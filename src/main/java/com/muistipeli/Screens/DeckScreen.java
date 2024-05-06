@@ -199,7 +199,7 @@ public class DeckScreen extends JPanel {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-
+                    createDeck();
                 }
 
             });
@@ -506,7 +506,7 @@ public class DeckScreen extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 try {
                     database.setPakkaName(deck, newName.getText());
-                    refreshDeckScrollPane(deck, newName.getText());
+                    refreshDeckScrollPane();
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
@@ -551,7 +551,7 @@ public class DeckScreen extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 try {
                     if (database.addPakka(newName.getText())) {
-
+                        refreshDeckScrollPane();
                     }
                 } catch (Exception e1) {
                     e1.printStackTrace();
@@ -597,13 +597,12 @@ public class DeckScreen extends JPanel {
         scrollPane.setViewportView(korttiLista);
     }
 
-    private void refreshDeckScrollPane(String oldName, String newName) throws SQLException {
+    private void refreshDeckScrollPane() throws SQLException {
         HashMap<String, String> pakat = database.getAllPakka();
         model = new DefaultListModel<>();
         for (Map.Entry<String, String> entry : pakat.entrySet()) {
             model.addElement(entry.getKey() + ". " + entry.getValue());
         }
-        kortit = database.getKortit(newName);
         pakkaLista.setModel(model);
         scrollPane.setViewportView(pakkaLista);
     }
