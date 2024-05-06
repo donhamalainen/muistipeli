@@ -7,9 +7,9 @@ import java.util.Random;
 public class Game {
 
     // Attribuutit
-    private int oikea;
-    private int vaara;
-    private int jaljella;
+    private int oikea = ConstantValue.DEFAULT_STATS_CORRECT;
+    private int vaara = ConstantValue.DEFUALT_STATS_INCORRECT;
+    private int jaljella = ConstantValue.DEFAULT_SIZE_OF_DECK;
     private String randomWord;
     private String correctWord;
     private String deckName;
@@ -20,10 +20,10 @@ public class Game {
 
     // Konstruktorit
     public Game(String deckName) throws SQLException {
-        oikea = ConstantValue.DEFAULT_STATS_CORRECT;
-        vaara = ConstantValue.DEFUALT_STATS_INCORRECT;
-        jaljella = ConstantValue.DEFAULT_SIZE_OF_DECK;
         sanat = database.getKortit(deckName);
+        setOikea(oikea);
+        setVaara(vaara);
+        setJaljella(jaljella);
     }
 
     // Metodit
@@ -36,7 +36,7 @@ public class Game {
 
     public boolean endGame() {
         /*** END GAME ***/
-        if (jaljella <= 0) {
+        if (jaljella == 0) {
             System.out.println("Lopetetaan peli...");
             return true;
         }
@@ -45,7 +45,7 @@ public class Game {
     }
 
     public String getRandomWord() {
-        // Tarkistus onko sanoja jäljellä ja ettei pakka ole tyh
+        // Tarkistus onko sanoja jäljellä ja ettei pakka ole tyhjä
         if (jaljella <= 0 || sanat.isEmpty()) {
             return null;
         }
@@ -58,20 +58,17 @@ public class Game {
         return randomWord;
     }
 
-    public void printSize() {
-        System.out.println(sanat.size());
-    }
-
     public boolean checkAnswer(String answer) {
-
-        System.out.println(sanat.get(randomWord));
-
         if (answer.equalsIgnoreCase(sanat.get(randomWord))) {
             oikea = oikea + 1;
             return true;
         }
         vaara = vaara + 1;
         return false;
+    }
+
+    private int deckSize(){
+        return sanat.size();
     }
 
     public int getOikea() {
@@ -95,7 +92,10 @@ public class Game {
     }
 
     public void setJaljella(int jaljella) {
+        if (sanat.size() < 15){
+            this.jaljella = sanat.size();
+        }else{
         this.jaljella = jaljella;
+        }
     }
-
 }

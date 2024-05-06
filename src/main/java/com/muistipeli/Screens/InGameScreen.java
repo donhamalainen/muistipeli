@@ -51,7 +51,6 @@ public class InGameScreen extends JPanel implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println("Vaihdetaan näkymään: " + screen);
             rootCardLayout.show(rootCards, screen);
         }
     }
