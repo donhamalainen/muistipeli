@@ -144,6 +144,7 @@ public class DeckScreen extends JPanel {
 
     /********* SHOW THE DECKS *********/
     private void pakkojenListaus() {
+        // JLabel deckIsEmpty = new JLabel("Et ole vielä luonut pelattavia pakkoja");
         try {
             constraints = new GridBagConstraints();
             constraints.gridx = 0;
@@ -180,7 +181,7 @@ public class DeckScreen extends JPanel {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-
+                    deleteDeck();
                 }
 
             });
@@ -288,32 +289,41 @@ public class DeckScreen extends JPanel {
             kortit = database.getKortit(pakkaNimi);
             korttiModel = new DefaultListModel<>();
             int count = 1;
-            for (Map.Entry<String, String> entry : kortit.entrySet()) {
-                korttiModel.addElement(count + ". " + entry.getKey() + " - " + entry.getValue());
-                count++;
+            if (!kortit.isEmpty()) {
+                for (Map.Entry<String, String> entry : kortit.entrySet()) {
+                    korttiModel.addElement(count + ". " + entry.getKey() + " - " + entry.getValue());
+                    count++;
+                }
+            } else {
+                korttiModel.addElement("Kortteja ei ole vielä lisätty tähän pakkaan");
             }
+
             korttiLista = new JList<>(korttiModel);
             korttiLista.setModel(korttiModel);
-            korttiLista.setCursor(new Cursor(Cursor.HAND_CURSOR));
             korttiLista.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             korttiLista.setCursor(new Cursor(Cursor.HAND_CURSOR));
             korttiLista.setFont(new Font("Arial", Font.ITALIC, 16));
             korttiLista.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             scrollPane.setViewportView(korttiLista);
 
-            korttiLista.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    if (e.getClickCount() == 2) {
-                        String fullText = korttiLista.getModel()
-                                .getElementAt(korttiLista.locationToIndex(e.getPoint()));
-                        String[] parts = fullText.split(" - ");
-                        String word = parts.length > 0 ? parts[0].substring(parts[0].indexOf('.') + 2) : "";
-                        String translation = parts.length > 1 ? parts[1] : "";
-                        popUP(word, translation, pakkaNimi);
+            if (kortit.isEmpty()) {
+                korttiLista.setEnabled(false);
+            } else {
+                korttiLista.setEnabled(true);
+                korttiLista.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if (e.getClickCount() == 2) {
+                            String fullText = korttiLista.getModel()
+                                    .getElementAt(korttiLista.locationToIndex(e.getPoint()));
+                            String[] parts = fullText.split(" - ");
+                            String word = parts.length > 0 ? parts[0].substring(parts[0].indexOf('.') + 2) : "";
+                            String translation = parts.length > 1 ? parts[1] : "";
+                            popUP(word, translation, pakkaNimi);
+                        }
                     }
-                }
-            });
+                });
+            }
 
             // Otsikkopaneeli
             korttiHeaderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -389,16 +399,18 @@ public class DeckScreen extends JPanel {
 
         final JDialog dialog = optionPane.createDialog(this, "Muokkaa korttia");
 
-        // OK BUTTON
         okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                updateCard(oldWord, oldTranslation, wordField.getText(), translationField.getText(), pakkaNimi);
+                String newWord = wordField.getText();
+                String newTranslate = translationField.getText();
+                updateCard(oldWord, oldTranslation, newWord.toLowerCase(),
+                        newTranslate.toLowerCase(),
+                        pakkaNimi);
                 dialog.dispose();
             }
 
         });
-        // CANCEL BUTTON
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -406,22 +418,20 @@ public class DeckScreen extends JPanel {
             }
 
         });
-        // DELETE BUTTON
         deleteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    if (database.deleteKortti()) {
-                        JOptionPane.showMessageDialog(dialog, "Kortti poistettiin onnistuneesti", "Onnistui",
-                                JOptionPane.DEFAULT_OPTION);
+                    if (database.deleteKortti(oldWord, oldTranslation)) {
+                        refreshCardScrollPane(pakkaNimi);
                         dialog.dispose();
                     } else {
-                        throw new Exception("Tuntematon virhe poistettaessa korttia.");
+                        throw new SQLException("Tuntematon virhe poistettaessa korttia.");
                     }
-                } catch (Exception ex) {
+                } catch (SQLException ex) {
                     JOptionPane.showMessageDialog(dialog, "Kortin poistaminen epäonnistui: " + ex.getMessage(), "Virhe",
                             JOptionPane.ERROR_MESSAGE);
-                    ex.printStackTrace(); // Tulostaa virheen stack trace -tiedot konsoliin, joka toimii "logina"
+                    ex.printStackTrace();
 
                 }
             }
@@ -455,21 +465,34 @@ public class DeckScreen extends JPanel {
 
         final JDialog dialog = optionPane.createDialog(this, "Luo kortti");
 
-        // OK BUTTON
         okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    database.addKortti(wordField.getText(), translationField.getText(), pakkaNimi);
-                    refreshCardScrollPane(pakkaNimi);
+                    String word = wordField.getText().trim();
+                    String translation = translationField.getText().trim();
+                    if (word.isEmpty() || translation.isEmpty()) {
+                        System.err.println("Kortin uusia tietoja ei ole täytetty");
+                        JOptionPane.showMessageDialog(dialog,
+                                "Täytä kortin tiedot [sana & käännös] lisätäksesi uusi kortti",
+                                "Virhe",
+                                JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        database.addKortti(wordField.getText(), translationField.getText(), pakkaNimi);
+                        refreshCardScrollPane(pakkaNimi);
+                        dialog.dispose();
+                    }
+
                 } catch (SQLException e1) {
                     e1.printStackTrace();
+                    JOptionPane.showMessageDialog(dialog,
+                            "Tietokantavirhe: Korttia ei voitu lisätä. " + e1.getMessage(),
+                            "Virhe",
+                            JOptionPane.ERROR_MESSAGE);
                 }
-                dialog.dispose();
             }
-
         });
-        // CANCEL BUTTON
+
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -479,6 +502,17 @@ public class DeckScreen extends JPanel {
         });
 
         dialog.setVisible(true);
+    }
+
+    private void updateCard(String oldWord, String oldTranslation, String newWord, String newTranslation,
+            String pakkaNimi) {
+        try {
+            database.setKortti(oldWord, newWord, newTranslation);
+            refreshCardScrollPane(pakkaNimi);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Virhe päivitettäessä korttia tietokannassa: " + e.getMessage(),
+                    "Virhe", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /******** DECKS ********/
@@ -500,7 +534,6 @@ public class DeckScreen extends JPanel {
 
         final JDialog dialog = optionPane.createDialog(this, "Muokkaa pakan nimeä");
 
-        // OK BUTTON
         okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -514,7 +547,6 @@ public class DeckScreen extends JPanel {
             }
 
         });
-        // CANCEL BUTTON
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -528,9 +560,9 @@ public class DeckScreen extends JPanel {
     }
 
     private void createDeck() {
-        final JTextField newName = new JTextField("");
+        final JTextField newDeck = new JTextField("");
         Object[] fields = {
-                "Anna pakalle nimi:", newName,
+                "Anna pakalle nimi:", newDeck,
         };
 
         JButton okButton = new JButton("Vahvista");
@@ -545,22 +577,32 @@ public class DeckScreen extends JPanel {
 
         final JDialog dialog = optionPane.createDialog(this, "Muokkaa pakan nimeä");
 
-        // OK BUTTON
         okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                String deckName = newDeck.getText().trim();
                 try {
-                    if (database.addPakka(newName.getText())) {
+                    if (!deckName.isEmpty()) {
+                        database.addPakka(deckName);
                         refreshDeckScrollPane();
+                        dialog.dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(dialog,
+                                "Täytä pakan tiedot [nimi] lisätäksesi luodaksesi uusi pakka",
+                                "Virhe",
+                                JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (Exception e1) {
                     e1.printStackTrace();
+                    JOptionPane.showMessageDialog(dialog,
+                            "Tietokantavirhe: Pakkaa ei voitu lisätä. " + e1.getMessage(),
+                            "Virhe",
+                            JOptionPane.ERROR_MESSAGE);
                 }
-                dialog.dispose();
             }
 
         });
-        // CANCEL BUTTON
+
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -573,26 +615,28 @@ public class DeckScreen extends JPanel {
 
     }
 
-    private void updateCard(String oldWord, String oldTranslation, String newWord, String newTranslation,
-            String pakkaNimi) {
-        try {
-            database.setKortti(oldWord, newWord, newTranslation);
-            refreshCardScrollPane(pakkaNimi);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Virhe päivitettäessä korttia tietokannassa: " + e.getMessage(),
-                    "Virhe", JOptionPane.ERROR_MESSAGE);
-        }
+    private void deleteDeck() {
+
     }
 
     /******** REFRESH ********/
-    private void refreshCardScrollPane(String pakkaNimi) throws SQLException {
-        HashMap<String, String> kortit = database.getKortit(pakkaNimi);
+    private void refreshCardScrollPane(final String pakkaNimi) throws SQLException {
+        kortit = database.getKortit(pakkaNimi);
         korttiModel = new DefaultListModel<>();
         int count = 1;
-        for (Map.Entry<String, String> entry : kortit.entrySet()) {
-            korttiModel.addElement(count + ". " + entry.getKey() + " - " + entry.getValue());
-            count++;
+        if (!kortit.isEmpty()) {
+            for (Map.Entry<String, String> entry : kortit.entrySet()) {
+                korttiModel.addElement(count + ". " + entry.getKey() + " - " + entry.getValue());
+                count++;
+            }
+        } else {
+            korttiModel.addElement("Kortteja ei ole vielä lisätty tähän pakkaan");
         }
+
+        if (kortit.isEmpty()) {
+            korttiLista.setEnabled(false);
+        }
+
         korttiLista.setModel(korttiModel);
         scrollPane.setViewportView(korttiLista);
     }
