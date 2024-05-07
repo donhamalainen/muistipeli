@@ -32,7 +32,7 @@ public class InGameScreen extends JPanel implements ActionListener {
 
         this.rootCards = cards;
         rootCardLayout = (CardLayout) rootCards.getLayout();
-        game = new Game("123");
+        game = new Game("suomi");
         c = new GridBagConstraints();
         setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
         setLayout(new GridBagLayout());
@@ -40,6 +40,19 @@ public class InGameScreen extends JPanel implements ActionListener {
         addInfoPanel();
         addGameComponents();
 
+    }
+
+    public InGameScreen(JPanel cards, Game game) throws SQLException{
+        
+        this.rootCards = cards;
+        rootCardLayout = (CardLayout) rootCards.getLayout();
+        this.game = game;
+        c = new GridBagConstraints();
+        setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
+        setLayout(new GridBagLayout());
+        setVisible(true);
+        addInfoPanel();
+        addGameComponents();
     }
 
     /******* SWITCHER *******/
