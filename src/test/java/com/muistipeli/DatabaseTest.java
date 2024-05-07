@@ -17,12 +17,18 @@ public class DatabaseTest {
         // Luodaan pakkat ja lisätään kortit
         database.addPakka("englanti");
         database.addPakka("suomi");
+        database.addPakka("ruotsi");
+        database.addPakka("saksa");
 
         database.addKortti("cat", "kissa", "englanti");
         database.addKortti("car", "auto", "englanti");
 
         database.addKortti("ihminen", "person", "suomi");
         database.addKortti("ikkuna", "window", "suomi");
+
+        database.addKortti("hund", "koira", "ruotsi");
+        database.addKortti("resa", "matkustaa", "ruotsi");
+
     }
 
     @Test

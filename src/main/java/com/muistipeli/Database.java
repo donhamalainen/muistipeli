@@ -127,7 +127,7 @@ public class Database {
             if (affectedRows > 0) {
                 System.out.println("Kortti päivitetty onnistuneesti.");
             } else {
-                System.out.println("Päivitys ei muuttanut yhtään riviä.");
+                throw new SQLException("Virhe");
             }
         } catch (SQLException e) {
             System.err.println("Virhe päivitettäessä korttia: " + e.getMessage());
@@ -136,9 +136,22 @@ public class Database {
     }
 
     /********* Poista kortti kokonaisuus *********/
-    public boolean deleteKortti() {
-
-        return false;
+    public boolean deleteKortti(String sana, String kaannos) throws SQLException {
+        String deleteSQL = "DELETE FROM kortit  WHERE sana = ? AND kaannos = ?";
+        try (PreparedStatement pstmt = dbConnection.prepareStatement(deleteSQL)) {
+            pstmt.setString(1, sana);
+            pstmt.setString(2, kaannos);
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows > 0) {
+                System.out.println("Kortti poistettiin onnistuneesti");
+                return true;
+            } else {
+                throw new SQLException("Virhe");
+            }
+        } catch (SQLException ex) {
+            System.err.println("Ilmeni virhe kun korttia yritettiin poistaa: " + ex.getMessage());
+            return false;
+        }
     }
 
     /********* Hae kaikki pakat *********/
