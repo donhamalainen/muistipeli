@@ -199,6 +199,7 @@ public class DeckScreen extends JPanel {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    System.out.println("CREATE DECK!!");
                     createDeck();
                 }
 

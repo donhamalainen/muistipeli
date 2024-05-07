@@ -11,7 +11,7 @@ public class Game {
     private int vaara = ConstantValue.DEFUALT_STATS_INCORRECT;
     private int jaljella = ConstantValue.DEFAULT_SIZE_OF_DECK;
     private String randomWord;
-    private String correctWord;
+    private String correctAnswer;
     private String deckName;
     // DATABASE
     Database database = Database.getInstance();
@@ -97,5 +97,10 @@ public class Game {
         }else{
         this.jaljella = jaljella;
         }
+    }
+    
+    public String getCorrectAnswer(){
+
+        return sanat.get(randomWord);
     }
 }
