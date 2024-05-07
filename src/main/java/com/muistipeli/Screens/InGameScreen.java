@@ -29,9 +29,10 @@ public class InGameScreen extends JPanel implements ActionListener {
      * @throws SQLException
      *******/
     public InGameScreen(JPanel cards) throws SQLException {
+
         this.rootCards = cards;
         rootCardLayout = (CardLayout) rootCards.getLayout();
-        game = new Game("suomi");
+        game = new Game("123");
         c = new GridBagConstraints();
         setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
         setLayout(new GridBagLayout());
@@ -190,7 +191,7 @@ public class InGameScreen extends JPanel implements ActionListener {
     public void endingScreen() {
         String[] responses = { "Palaa päävalikkoon", "Valitse uusi pakka", "Pelaa uudestaan" };
         int answer = JOptionPane.showOptionDialog(null,
-                "Olet pelannut kaikki kortit, haluatko palata päävalikkoon?",
+                "Olet pelannut " + game.getPelatutKortit() + "/" + game.deckSize() + " korttia haluatko palata päävalikkoon?",
                 "Pelin lopetus",
                 JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
@@ -229,6 +230,7 @@ public class InGameScreen extends JPanel implements ActionListener {
                 rootCardLayout.show(rootCards, ConstantValue.ROOTSCREEN_STRING);
             }
         } else if (e.getSource() == vastausKentta || e.getSource() == enterAnswerButton) {
+
             String message; // Käyttäjälle ilmoitus tuloksesta
             if (game.checkAnswer(vastausKentta.getText())) {
                 // OIKEA VASTAUS ILMOITUS
