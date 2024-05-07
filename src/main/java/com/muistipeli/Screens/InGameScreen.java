@@ -39,8 +39,9 @@ public class InGameScreen extends JPanel implements ActionListener {
         setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
         setLayout(new GridBagLayout());
         setVisible(true);
-        // addInfoPanel();
-        // addGameComponents();
+        addInfoPanel();
+        addGameComponents();
+
     }
 
     /******* SWITCHER *******/

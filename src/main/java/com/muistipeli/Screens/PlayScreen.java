@@ -147,12 +147,12 @@ public class PlayScreen extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 rootCardLayout.show(rootCards, ConstantValue.IN_GAME_SCREEN_STRING);
-                try {
+/*                 try {
                     Game game = new Game(getValittuPakka());
                 } catch (SQLException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
-                }
+                } */
             }
             
         });
