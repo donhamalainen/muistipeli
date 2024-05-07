@@ -11,12 +11,11 @@ public class Game {
     private int vaara = ConstantValue.DEFUALT_STATS_INCORRECT;
     private int jaljella = ConstantValue.DEFAULT_SIZE_OF_DECK;
     private String randomWord;
-    private String correctWord;
-    private String deckName;
+    private int pelatutKortit;
+
     // DATABASE
     Database database = Database.getInstance();
     HashMap<String, String> sanat;
-    // List<Pair<String, String>> sanat = new ArrayList<>();
 
     // Konstruktorit
     public Game(String deckName) throws SQLException {
@@ -54,6 +53,7 @@ public class Game {
 
         // Haetaan satunnais indeksillä sana
         randomWord = (String) sanat.keySet().toArray()[randomIndex];
+        pelatutKortit = pelatutKortit + 1;
         jaljella = jaljella - 1;
         return randomWord;
     }
@@ -67,7 +67,7 @@ public class Game {
         return false;
     }
 
-    private int deckSize(){
+    public int deckSize(){
         return sanat.size();
     }
 
@@ -92,10 +92,20 @@ public class Game {
     }
 
     public void setJaljella(int jaljella) {
+        
         if (sanat.size() < 15){
             this.jaljella = sanat.size();
         }else{
         this.jaljella = jaljella;
         }
+    }
+    
+    public String getCorrectAnswer(){
+
+        return sanat.get(randomWord);
+    }
+
+    public int getPelatutKortit() {
+        return pelatutKortit;
     }
 }

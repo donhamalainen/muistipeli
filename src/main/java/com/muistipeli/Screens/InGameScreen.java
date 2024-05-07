@@ -18,7 +18,7 @@ public class InGameScreen extends JPanel implements ActionListener {
     private JLabel oikea, vaara, jaljella, sana;
     private JTextField vastausKentta;
     private JPanel infoPanel;
-    private JButton lopeta;
+    private JButton lopeta, enterAnswerButton;
     private Game game;
     private JPanel rootCards;
     private CardLayout rootCardLayout;
@@ -29,9 +29,10 @@ public class InGameScreen extends JPanel implements ActionListener {
      * @throws SQLException
      *******/
     public InGameScreen(JPanel cards) throws SQLException {
+
         this.rootCards = cards;
         rootCardLayout = (CardLayout) rootCards.getLayout();
-        game = new Game("suomi");
+        game = new Game("123");
         c = new GridBagConstraints();
         setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
         setLayout(new GridBagLayout());
@@ -162,11 +163,12 @@ public class InGameScreen extends JPanel implements ActionListener {
         gamePanel.add(vastausKentta, c);
 
         // Vastauksen syöttö näppäin
-        JButton button = new JButton("->");
-        button.setPreferredSize(new Dimension(50, 30));
-        button.setFocusable(false);
+        enterAnswerButton = new JButton("->");
+        enterAnswerButton.setPreferredSize(new Dimension(50, 30));
+        enterAnswerButton.setFocusable(false);
+        enterAnswerButton.addActionListener(this);
         c.gridx = 1;
-        gamePanel.add(button, c);
+        gamePanel.add(enterAnswerButton, c);
         // Asetetaan paneelin sijainniksi keskikohta
         c.gridx = 1;
         c.gridy = 0;
@@ -187,25 +189,27 @@ public class InGameScreen extends JPanel implements ActionListener {
     }
 
     public void endingScreen() {
-        String[] responses = { "Palaa päävalikkoon", "Pelaa uudestaan" };
+        String[] responses = { "Palaa päävalikkoon", "Valitse uusi pakka", "Pelaa uudestaan" };
         int answer = JOptionPane.showOptionDialog(null,
-                "Olet pelannut kaikki kortit, haluatko palata päävalikkoon?",
-                "Peli lopetus",
-                JOptionPane.YES_NO_OPTION,
+                "Olet pelannut " + game.getPelatutKortit() + "/" + game.deckSize() + " korttia haluatko palata päävalikkoon?",
+                "Pelin lopetus",
+                JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 null,
                 responses,
                 null);
 
-        if (answer == 0){
+        if (answer == 0) {
             rootCardLayout.show(rootCards, ConstantValue.ROOTSCREEN_STRING);
         }
-
-        if (answer == 1){
-            try{
+        if (answer == 1) {
+            rootCardLayout.show(rootCards, ConstantValue.PLAYSCREEN_STRING);
+        }
+        if (answer == 2) {
+            try {
                 game = new Game("suomi");
                 refreshUI();
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 System.out.println("SQL ERROR: ");
                 e.printStackTrace();
             }
@@ -225,8 +229,27 @@ public class InGameScreen extends JPanel implements ActionListener {
             if (answer == 0) {
                 rootCardLayout.show(rootCards, ConstantValue.ROOTSCREEN_STRING);
             }
-        } else if (e.getSource() == vastausKentta) {
-            game.checkAnswer(vastausKentta.getText());
+        } else if (e.getSource() == vastausKentta || e.getSource() == enterAnswerButton) {
+
+            String message; // Käyttäjälle ilmoitus tuloksesta
+            if (game.checkAnswer(vastausKentta.getText())) {
+                // OIKEA VASTAUS ILMOITUS
+                message = "Vastasit oikein!\nOikea vastaus oli: " + game.getCorrectAnswer();
+            } else {
+                // VÄÄRÄ VASTAUS ILMOITUS
+                message = "Väärä vastaus\nOikea vastaus oli: " + game.getCorrectAnswer();
+            }
+            Timer timer = new Timer(1500, new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    JOptionPane.getRootFrame().dispose();
+                }
+
+            });
+            timer.setRepeats(false);
+            timer.start();
+            JOptionPane.showMessageDialog(null, message);
             refreshUI();
             if (game.endGame() == true) {
                 endingScreen();
