@@ -47,6 +47,8 @@ public class PlayScreen extends JPanel {
         run();
     }
 
+    
+
     /******* ALUSTUS *******/
     private void initializePlayScreen() throws SQLException {
         setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
@@ -226,6 +228,7 @@ public class PlayScreen extends JPanel {
                     String pakkaNimi = pakkaLista.getSelectedValue();
                     if (pakkaNimi != null) {
                         valittuPakka = pakkaNimi.substring(pakkaNimi.indexOf('.') + 2);
+                        System.out.println(valittuPakka);
                         playPanel.setEnabled(true);
                         playPanel.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
                         playPanel.setForeground(Color.BLACK);
