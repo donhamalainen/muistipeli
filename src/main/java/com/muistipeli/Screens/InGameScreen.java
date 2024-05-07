@@ -32,7 +32,7 @@ public class InGameScreen extends JPanel implements ActionListener {
 
         this.rootCards = cards;
         rootCardLayout = (CardLayout) rootCards.getLayout();
-        game = new Game("123");
+        game = new Game("suomi");
         c = new GridBagConstraints();
         setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
         setLayout(new GridBagLayout());
