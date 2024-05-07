@@ -114,7 +114,7 @@ public class RootScreen extends JFrame {
         PLAYSCREEN = new PlayScreen(rootCards, database);
         DECKSCREEN = new DeckScreen(rootCards, database);
         HELPSCREEN = new HelpScreen(rootCards);
-        INGAMESCREEN = new InGameScreen(rootCards);
+        INGAMESCREEN = new InGameScreen(rootCards, PLAYSCREEN);
         rootCards.add(PLAYSCREEN, ConstantValue.PLAYSCREEN_STRING);
         rootCards.add(DECKSCREEN, ConstantValue.DECKSCREEN_STRING);
         rootCards.add(HELPSCREEN, ConstantValue.HELPSCREEN_STRING);

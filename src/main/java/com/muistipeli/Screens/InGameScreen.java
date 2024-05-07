@@ -19,40 +19,28 @@ public class InGameScreen extends JPanel implements ActionListener {
     private JTextField vastausKentta;
     private JPanel infoPanel;
     private JButton lopeta, enterAnswerButton;
-    private Game game;
     private JPanel rootCards;
     private CardLayout rootCardLayout;
+    private PlayScreen playScreen;
+    private Game game;
 
     /*******
      * KONSTRUKTORI
      * 
      * @throws SQLException
      *******/
-    public InGameScreen(JPanel cards) throws SQLException {
 
+    public InGameScreen(JPanel cards, PlayScreen playScreen) throws SQLException {
         this.rootCards = cards;
         rootCardLayout = (CardLayout) rootCards.getLayout();
-        game = new Game("suomi");
+        this.playScreen = playScreen;
+
         c = new GridBagConstraints();
         setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
         setLayout(new GridBagLayout());
         setVisible(true);
-        addInfoPanel();
-        addGameComponents();
-
-    }
-
-    public InGameScreen(JPanel cards, Game game) throws SQLException{
-        
-        this.rootCards = cards;
-        rootCardLayout = (CardLayout) rootCards.getLayout();
-        this.game = game;
-        c = new GridBagConstraints();
-        setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
-        setLayout(new GridBagLayout());
-        setVisible(true);
-        addInfoPanel();
-        addGameComponents();
+        // addInfoPanel();
+        // addGameComponents();
     }
 
     /******* SWITCHER *******/
@@ -204,7 +192,8 @@ public class InGameScreen extends JPanel implements ActionListener {
     public void endingScreen() {
         String[] responses = { "Palaa päävalikkoon", "Valitse uusi pakka", "Pelaa uudestaan" };
         int answer = JOptionPane.showOptionDialog(null,
-                "Olet pelannut " + game.getPelatutKortit() + "/" + game.deckSize() + " korttia haluatko palata päävalikkoon?",
+                "Olet pelannut " + game.getPelatutKortit() + "/" + game.deckSize()
+                        + " korttia haluatko palata päävalikkoon?",
                 "Pelin lopetus",
                 JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
