@@ -43,7 +43,7 @@ public class Game {
     /******** GAME CARD SHUFFLE ********/
     public HashMap<String, String> getRandomCards(int shuffleCount) {
         HashMap<String, String> shuffledList = new HashMap<>();
-        List<String> keys = new ArrayList<>(kortit.keySet()); // Käytä kortit-karttaa suoraan
+        List<String> keys = new ArrayList<>(kortit.keySet());
 
         if (shuffleCount > kortit.size()) {
             shuffleCount = kortit.size();
