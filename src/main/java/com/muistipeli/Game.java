@@ -1,74 +1,80 @@
 package com.muistipeli;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 public class Game {
 
     // Attribuutit
+    private Random random = new Random();
     private int oikea = ConstantValue.DEFAULT_STATS_CORRECT;
     private int vaara = ConstantValue.DEFUALT_STATS_INCORRECT;
     private int jaljella = ConstantValue.DEFAULT_SIZE_OF_DECK;
-    private String randomWord;
     private int pelatutKortit;
-
+    private HashMap<String, String> kortit = new HashMap<>();
     // DATABASE
     Database database = Database.getInstance();
-    HashMap<String, String> sanat;
 
     // Konstruktorit
     public Game(String deckName) throws SQLException {
-        sanat = database.getKortit(deckName);
+        startGame(deckName);
+    }
+
+    /******** GAME START ********/
+    public void startGame(String deckName) throws SQLException {
+        kortit = database.getKortit(deckName);
         setOikea(oikea);
         setVaara(vaara);
         setJaljella(jaljella);
-    }
-
-    // Metodit
-    /******** GAME ********/
-    public void startGame() {
-        /*** START GAME ***/
-        System.out.println("Aloitetaan peli...");
 
     }
 
-    public boolean endGame() {
-        /*** END GAME ***/
-        if (jaljella == 0) {
-            System.out.println("Lopetetaan peli...");
+    /******** GAME END ********/
+    public void endGame() {
+        this.oikea = ConstantValue.DEFAULT_STATS_CORRECT;
+        this.vaara = ConstantValue.DEFUALT_STATS_INCORRECT;
+        this.jaljella = ConstantValue.DEFAULT_SIZE_OF_DECK;
+        kortit = new HashMap<>();
+    }
+
+    /******** GAME CARD SHUFFLE ********/
+    public HashMap<String, String> getRandomCards(int shuffleCount) {
+        HashMap<String, String> shuffledList = new HashMap<>();
+        List<String> keys = new ArrayList<>(kortit.keySet()); // Käytä kortit-karttaa suoraan
+
+        if (shuffleCount > kortit.size()) {
+            shuffleCount = kortit.size();
+        }
+
+        for (int i = 0; i < shuffleCount; i++) {
+            int randomIndex = random.nextInt(keys.size());
+            String selectedKey = keys.get(randomIndex);
+            shuffledList.put(selectedKey, kortit.get(selectedKey));
+            keys.remove(randomIndex);
+        }
+
+        return shuffledList;
+    }
+
+    /******** GAME CARD ANSWER CHECKER ********/
+    public boolean checkAnswer(String answer, String word) {
+        if (answer.equalsIgnoreCase(kortit.get(word))) {
+            oikea++;
+            jaljella--;
             return true;
+        } else {
+            vaara++;
+            jaljella--;
+            return false;
         }
-
-        return false;
     }
 
-    public String getRandomWord() {
-        // Tarkistus onko sanoja jäljellä ja ettei pakka ole tyhjä
-        if (jaljella <= 0 || sanat.isEmpty()) {
-            return null;
-        }
-        // Otetaan random indeksi hashMapin koon mukaan
-        int randomIndex = new Random().nextInt(sanat.size());
-
-        // Haetaan satunnais indeksillä sana
-        randomWord = (String) sanat.keySet().toArray()[randomIndex];
-        pelatutKortit = pelatutKortit + 1;
-        jaljella = jaljella - 1;
-        return randomWord;
-    }
-
-    public boolean checkAnswer(String answer) {
-        if (answer.equalsIgnoreCase(sanat.get(randomWord))) {
-            oikea = oikea + 1;
-            return true;
-        }
-        vaara = vaara + 1;
-        return false;
-    }
-
-    public int deckSize(){
-        return sanat.size();
+    /******** GETTERS & SETTERS ********/
+    public int deckSize() {
+        return kortit.size();
     }
 
     public int getOikea() {
@@ -92,17 +98,12 @@ public class Game {
     }
 
     public void setJaljella(int jaljella) {
-        
-        if (sanat.size() < 15){
-            this.jaljella = sanat.size();
-        }else{
-        this.jaljella = jaljella;
-        }
-    }
-    
-    public String getCorrectAnswer(){
 
-        return sanat.get(randomWord);
+        if (kortit.size() < 15) {
+            this.jaljella = kortit.size();
+        } else {
+            this.jaljella = jaljella;
+        }
     }
 
     public int getPelatutKortit() {

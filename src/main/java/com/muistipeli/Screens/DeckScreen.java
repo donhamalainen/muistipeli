@@ -40,7 +40,7 @@ public class DeckScreen extends JPanel {
     // Painikkeet
     JPanel pakkaHeaderPanel, korttiHeaderPanel;
     JLabel infoLabel;
-    JButton backButton, renameButton;
+    JButton backButton, renameButton, modifyDeckButton;
 
     /******* KONSTRUKTORI *******/
     public DeckScreen(JPanel cards, Database db) throws SQLException {
@@ -60,8 +60,6 @@ public class DeckScreen extends JPanel {
         try {
             if (database.hasPakka()) {
                 pakat = database.getAllPakka();
-            } else {
-                pakat = null;
             }
         } catch (Exception e) {
             System.err.println("Virhe 'PlayScreen:ssä' pakkoja haettaessa " + e.getMessage());
@@ -91,7 +89,7 @@ public class DeckScreen extends JPanel {
         backButton = new JButton("Päävalikko");
         backButton.addActionListener(new Switcher(ConstantValue.ROOTSCREEN_STRING));
         backButton.setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
-        backButton.setFont(new Font("Arial", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
+        backButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
         backButton.setPreferredSize(
                 new Dimension(ConstantValue.BACK_BUTTONS_SIZE_WIDTH, ConstantValue.BACK_BUTTONS_SIZE_HEIGHT));
         backButton.setBorderPainted(false);
@@ -123,9 +121,9 @@ public class DeckScreen extends JPanel {
         add(selectDeckLabel, constraints);
 
         // PELAA PAINIKE
-        infoLabel = new JLabel("Siirry pakan sisälle tuplaklikkaamalla");
+        infoLabel = new JLabel("Tuplaklikkaa valitsemaasi pakkaa siirtyäksesi korttinäkymään");
 
-        infoLabel.setFont(new Font("Arial", Font.PLAIN, ConstantValue.DEFAULT_PLAY_BUTTON_SIZE));
+        infoLabel.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.DEFAULT_PLAY_BUTTON_SIZE));
         infoLabel.setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
         infoLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
@@ -144,7 +142,6 @@ public class DeckScreen extends JPanel {
 
     /********* SHOW THE DECKS *********/
     private void pakkojenListaus() {
-        // JLabel deckIsEmpty = new JLabel("Et ole vielä luonut pelattavia pakkoja");
         try {
             constraints = new GridBagConstraints();
             constraints.gridx = 0;
@@ -155,19 +152,23 @@ public class DeckScreen extends JPanel {
             constraints.insets = new Insets(10, 50, 10, 50);
 
             model = new DefaultListModel<>();
-
+            int count = 1;
             if (!pakat.isEmpty()) {
                 for (Map.Entry<String, String> pakka : pakat.entrySet()) {
-                    model.addElement(pakka.getKey() + ". " + (String) pakka.getValue());
+                    model.addElement(count + ". " + (String) pakka.getValue());
+                    count++;
                 }
             } else {
                 model.addElement("Et ole vielä luonut pelattavia pakkoja");
             }
 
             pakkaLista = new JList<>(model);
+            if (pakat.isEmpty()) {
+                pakkaLista.setEnabled(false);
+            }
             pakkaLista.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             pakkaLista.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            pakkaLista.setFont(new Font("Arial", Font.ITALIC, 16));
+            pakkaLista.setFont(new Font("Verdana", Font.ITALIC, 16));
             pakkaLista.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
             /******* BUTTONS *******/
@@ -181,12 +182,20 @@ public class DeckScreen extends JPanel {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    deleteDeck();
+                    if (selectedDeck != null) {
+                        deleteDeck(selectedDeck);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Valitse poistettava pakka",
+                                "Virhe",
+                                JOptionPane.INFORMATION_MESSAGE);
+                    }
                 }
 
             });
-            deleteDeckButton.setFont(new Font("Arial", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
+            deleteDeckButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
             deleteDeckButton.setBorderPainted(false);
+            deleteDeckButton.setPreferredSize(new Dimension(ConstantValue.SCROL_LIST_HEADER_BUTTONS_SIZE_WIDTH,
+                    ConstantValue.SCROL_LIST_HEADER_BUTTONS_SIZE_HEIGHT));
             deleteDeckButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
             deleteDeckButton.setOpaque(true);
             deleteDeckButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
@@ -200,13 +209,14 @@ public class DeckScreen extends JPanel {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    System.out.println("CREATE DECK!!");
                     createDeck();
                 }
 
             });
-            addDeckButton.setFont(new Font("Arial", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
+            addDeckButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
             addDeckButton.setBorderPainted(false);
+            addDeckButton.setPreferredSize(new Dimension(ConstantValue.SCROL_LIST_HEADER_BUTTONS_SIZE_WIDTH,
+                    ConstantValue.SCROL_LIST_HEADER_BUTTONS_SIZE_HEIGHT));
             addDeckButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
             addDeckButton.setOpaque(true);
             addDeckButton.setBackground(Color.GREEN);
@@ -215,7 +225,7 @@ public class DeckScreen extends JPanel {
             pakkaHeaderPanel.add(addDeckButton);
 
             // MODIFY
-            final JButton modifyDeckButton = new JButton("Vaihda nimeä");
+            modifyDeckButton = new JButton("Vaihda nimeä");
             modifyDeckButton.setEnabled(false);
             modifyDeckButton.addActionListener(new ActionListener() {
 
@@ -225,8 +235,10 @@ public class DeckScreen extends JPanel {
                 }
 
             });
-            modifyDeckButton.setFont(new Font("Arial", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
+            modifyDeckButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
             modifyDeckButton.setBorderPainted(false);
+            modifyDeckButton.setPreferredSize(new Dimension(ConstantValue.SCROL_LIST_HEADER_BUTTONS_SIZE_WIDTH,
+                    ConstantValue.SCROL_LIST_HEADER_BUTTONS_SIZE_HEIGHT));
             modifyDeckButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
             modifyDeckButton.setOpaque(true);
             modifyDeckButton.setBackground(Color.LIGHT_GRAY);
@@ -240,7 +252,7 @@ public class DeckScreen extends JPanel {
             pakkaLista.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    if (e.getClickCount() == 2) {
+                    if (e.getClickCount() == 2 && pakkaLista.isEnabled()) {
                         int index = pakkaLista.locationToIndex(e.getPoint());
                         if (index >= 0) {
                             String pakka = model.getElementAt(index)
@@ -303,7 +315,7 @@ public class DeckScreen extends JPanel {
             korttiLista.setModel(korttiModel);
             korttiLista.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             korttiLista.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            korttiLista.setFont(new Font("Arial", Font.ITALIC, 16));
+            korttiLista.setFont(new Font("Verdana", Font.ITALIC, 16));
             korttiLista.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             scrollPane.setViewportView(korttiLista);
 
@@ -341,7 +353,9 @@ public class DeckScreen extends JPanel {
                 }
 
             });
-            scrollBackButton.setFont(new Font("Arial", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
+            scrollBackButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
+            scrollBackButton.setPreferredSize(new Dimension(ConstantValue.SCROL_LIST_HEADER_BUTTONS_SIZE_WIDTH,
+                    ConstantValue.SCROL_LIST_HEADER_BUTTONS_SIZE_HEIGHT));
             scrollBackButton.setBorderPainted(false);
             scrollBackButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
             scrollBackButton.setOpaque(true);
@@ -362,7 +376,9 @@ public class DeckScreen extends JPanel {
             });
 
             createNewCardButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-            createNewCardButton.setFont(new Font("Arial", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
+            createNewCardButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
+            createNewCardButton.setPreferredSize(new Dimension(ConstantValue.SCROL_LIST_HEADER_BUTTONS_SIZE_WIDTH,
+                    ConstantValue.SCROL_LIST_HEADER_BUTTONS_SIZE_HEIGHT));
             createNewCardButton.setBorderPainted(false);
             createNewCardButton.setOpaque(true);
             createNewCardButton.setBackground(Color.GREEN);
@@ -370,10 +386,32 @@ public class DeckScreen extends JPanel {
             createNewCardButton.setFocusPainted(false);
             korttiHeaderPanel.add(createNewCardButton);
 
+            // luo uusikortit
+            JButton deleteCardButton = new JButton("Poista kortti");
+
+            deleteCardButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+
+                }
+
+            });
+
+            deleteCardButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+            deleteCardButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
+            deleteCardButton.setPreferredSize(new Dimension(ConstantValue.SCROL_LIST_HEADER_BUTTONS_SIZE_WIDTH,
+                    ConstantValue.SCROL_LIST_HEADER_BUTTONS_SIZE_HEIGHT));
+            deleteCardButton.setBorderPainted(false);
+            deleteCardButton.setOpaque(true);
+            deleteCardButton.setBackground(Color.orange);
+            deleteCardButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            deleteCardButton.setFocusPainted(false);
+            korttiHeaderPanel.add(deleteCardButton);
+
             scrollPane.setColumnHeaderView(korttiHeaderPanel);
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Virhe kortteja haettaessa: " + ex.getMessage(),
-                    "Virhe", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Virhe kortteja haettaessa: " + ex.getMessage(), "Virhe",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -576,7 +614,7 @@ public class DeckScreen extends JPanel {
                 new Object[] { okButton, cancelButton },
                 okButton);
 
-        final JDialog dialog = optionPane.createDialog(this, "Muokkaa pakan nimeä");
+        final JDialog dialog = optionPane.createDialog(this, "Anna pakalle nimi");
 
         okButton.addActionListener(new ActionListener() {
             @Override
@@ -584,7 +622,7 @@ public class DeckScreen extends JPanel {
                 String deckName = newDeck.getText().trim();
                 try {
                     if (!deckName.isEmpty()) {
-                        database.addPakka(deckName);
+                        database.addPakka(deckName.toLowerCase());
                         refreshDeckScrollPane();
                         dialog.dispose();
                     } else {
@@ -616,7 +654,31 @@ public class DeckScreen extends JPanel {
 
     }
 
-    private void deleteDeck() {
+    private void deleteDeck(String pakkaNimi) {
+        try {
+            if (database.deletePakka(pakkaNimi)) {
+                refreshDeckScrollPane();
+                modifyDeckButton.setEnabled(false);
+                modifyDeckButton.setBackground(Color.LIGHT_GRAY);
+                JOptionPane.showMessageDialog(null, "Pakka " + pakkaNimi + " poistettu onnistuneesti.",
+                        "Pakan poisto",
+                        JOptionPane.INFORMATION_MESSAGE);
+                selectedDeck = null;
+            } else {
+                JOptionPane.showMessageDialog(null,
+                        "Pakan poistossa epäonnistui",
+                        "Epäonnistui",
+                        JOptionPane.ERROR_MESSAGE);
+                selectedDeck = null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                    "Pakan poistossa tapahtui virhe " + e.getMessage(),
+                    "Virhe",
+                    JOptionPane.ERROR_MESSAGE);
+            selectedDeck = null;
+        }
 
     }
 
@@ -643,12 +705,43 @@ public class DeckScreen extends JPanel {
     }
 
     private void refreshDeckScrollPane() throws SQLException {
-        HashMap<String, String> pakat = database.getAllPakka();
+        pakkaLista.setEnabled(false);
+        final HashMap<String, String> pakat = database.getAllPakka();
         model = new DefaultListModel<>();
-        for (Map.Entry<String, String> entry : pakat.entrySet()) {
-            model.addElement(entry.getKey() + ". " + entry.getValue());
+        int count = 1;
+        if (!pakat.isEmpty()) {
+            for (Map.Entry<String, String> pakka : pakat.entrySet()) {
+                model.addElement(count + ". " + pakka.getValue());
+                count++;
+            }
+            pakkaLista.setEnabled(true);
+        } else {
+            model.addElement("Et ole vielä luonut pelattavia pakkoja");
+            pakkaLista.setEnabled(false);
         }
+
         pakkaLista.setModel(model);
+
+        // Hiiren kuuntelija
+        pakkaLista.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && pakkaLista.isEnabled()) {
+                    int index = pakkaLista.locationToIndex(e.getPoint());
+                    if (index >= 0) {
+                        String pakka = model.getElementAt(index)
+                                .substring(model.getElementAt(index).indexOf('.') + 2);
+                        try {
+                            naytaKortit(pakka);
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(null, "Virhe kortteja haettaessa: " + ex.getMessage(),
+                                    "Virhe", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                }
+            }
+        });
         scrollPane.setViewportView(pakkaLista);
     }
+
 }

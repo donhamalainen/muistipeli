@@ -79,7 +79,7 @@ public class RootScreen extends JFrame {
         // LABEL
         JLabel labelPanel = new JLabel("Muistipeli");
         labelPanel.setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
-        labelPanel.setFont(new Font("Arial", Font.BOLD, ConstantValue.TITLE_DEFAULT_SIZE_ROOTSCREEN));
+        labelPanel.setFont(new Font("Verdana", Font.BOLD, ConstantValue.TITLE_DEFAULT_SIZE_ROOTSCREEN));
 
         constraints.anchor = GridBagConstraints.NORTHWEST;
         constraints.weightx = 1;
@@ -92,16 +92,18 @@ public class RootScreen extends JFrame {
         JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 0, 25));
         buttonPanel.setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
         JButton playButton = createButton(database.hasPakka() ? "Pelaa" : "Pakkoja ei ole luotu",
-                ConstantValue.PLAYSCREEN_STRING, 50, 200,
+                ConstantValue.PLAYSCREEN_STRING, 50, 250,
                 database.hasPakka() ? Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR) : Color.LIGHT_GRAY,
-                database.hasPakka() ? null : Color.GRAY, 18);
+                database.hasPakka() ? null : Color.GRAY, ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE);
         playButton.setEnabled(database.hasPakka());
         buttonPanel.add(playButton);
         buttonPanel.add(createButton(database.hasPakka() ? "Muokkaa pakkoja" : "Luo pakkoja",
-                ConstantValue.DECKSCREEN_STRING, 50, 200,
-                Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR), null, 18));
-        buttonPanel.add(createButton("Ohjeet", ConstantValue.HELPSCREEN_STRING, 50, 200,
-                Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR), null, 18));
+                ConstantValue.DECKSCREEN_STRING, 50, 250,
+                Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR), null,
+                ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE));
+        buttonPanel.add(createButton("Ohjeet", ConstantValue.HELPSCREEN_STRING, 50, 250,
+                Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR), null,
+                ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE));
 
         constraints = new GridBagConstraints();
         constraints.gridx = 0;
@@ -111,14 +113,12 @@ public class RootScreen extends JFrame {
         mainPanel.add(buttonPanel, constraints);
 
         // Muiden paneelien alustus
-        PLAYSCREEN = new PlayScreen(rootCards, database);
+        PLAYSCREEN = new PlayScreen(rootCards, database, this);
         DECKSCREEN = new DeckScreen(rootCards, database);
         HELPSCREEN = new HelpScreen(rootCards);
-        INGAMESCREEN = new InGameScreen(rootCards, PLAYSCREEN);
         rootCards.add(PLAYSCREEN, ConstantValue.PLAYSCREEN_STRING);
         rootCards.add(DECKSCREEN, ConstantValue.DECKSCREEN_STRING);
         rootCards.add(HELPSCREEN, ConstantValue.HELPSCREEN_STRING);
-        rootCards.add(INGAMESCREEN, ConstantValue.IN_GAME_SCREEN_STRING);
     }
 
     /* COMPONENTS */
@@ -126,7 +126,7 @@ public class RootScreen extends JFrame {
             Color foreColor,
             int fontSize) throws SQLException {
         final JButton button = new JButton(text);
-        button.setFont(new Font("Arial", Font.PLAIN, fontSize));
+        button.setFont(new Font("Verdana", Font.PLAIN, fontSize));
         button.addActionListener(new Switcher(screen));
         button.setPreferredSize(new Dimension(width, height));
 
@@ -160,5 +160,20 @@ public class RootScreen extends JFrame {
         });
 
         return button;
+    }
+
+    /**
+     * 
+     * @param selectedDeck
+     * @throws SQLException
+     * 
+     *                      <p>
+     *                      startGame metodi alustaa InGameScreen:n ja lisää sen
+     *                      CardLayout:n sisälle [rootCards]
+     *                      </p
+     */
+    public void startGame(String selectedDeck) throws SQLException {
+        INGAMESCREEN = new InGameScreen(rootCards, selectedDeck);
+        rootCards.add(INGAMESCREEN, ConstantValue.IN_GAME_SCREEN_STRING);
     }
 }
