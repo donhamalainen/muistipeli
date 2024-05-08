@@ -19,6 +19,7 @@ public class InGameScreen extends JPanel {
     private Game game;
     // Attributes
     private int currentCardIndex = 0;
+    private int playSize = 0;
     // GridBagConstraints
     private GridBagConstraints constraints = new GridBagConstraints();
     // Root Attributes
@@ -36,11 +37,12 @@ public class InGameScreen extends JPanel {
     private JButton enterAnswerButton;
 
     /******* KONSTRUKTORI *******/
-    public InGameScreen(JPanel cards, String deckName) throws SQLException {
+    public InGameScreen(JPanel cards, String deckName, int playSize) throws SQLException {
         this.rootCards = cards;
-        rootCardLayout = (CardLayout) rootCards.getLayout();
-        game = new Game(deckName);
-        kortit = game.getRandomCards(ConstantValue.DEFAULT_SIZE_OF_DECK);
+        this.rootCardLayout = (CardLayout) rootCards.getLayout();
+        this.playSize = playSize;
+        game = new Game(deckName, playSize);
+        kortit = game.getRandomCards(playSize);
         sanaLista = new ArrayList<>(kortit.keySet());
         kaannosLista = new ArrayList<>(kortit.values());
         initializeInGameScreen();
@@ -126,7 +128,7 @@ public class InGameScreen extends JPanel {
                 String[] responses = { "Kyllä", "Ei" };
                 int answer = JOptionPane.showOptionDialog(null,
                         "Haluatko varmasti lopettaa pelin?",
-                        "Exit",
+                        "Lopeta peli",
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.QUESTION_MESSAGE, null, responses, responses[1]);
                 if (answer == JOptionPane.YES_OPTION) {
@@ -204,27 +206,37 @@ public class InGameScreen extends JPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-
                 if (game.checkAnswer(answerField.getText(), sanaLista.get(currentCardIndex))) {
-                    currentCardIndex++;
                     answerField.setText("");
-                    wordLabel.setText(sanaLista.get(currentCardIndex));
                     rightAnswer.setText("Oikein: " + game.getOikea());
                     leftQuestions.setText("Kortteja jäljellä: " + game.getJaljella());
+
+                    currentCardIndex++;
+                    if (currentCardIndex < sanaLista.size()) {
+                        wordLabel.setText(sanaLista.get(currentCardIndex));
+                    } else {
+                        finish();
+                    }
+
                 } else {
                     showAnswer();
-                    currentCardIndex++;
                     answerField.setText("");
-                    wordLabel.setText(sanaLista.get(currentCardIndex));
                     wrongAnswer.setText("Väärin: " + game.getVaara());
                     leftQuestions.setText("Kortteja jäljellä: " + game.getJaljella());
-                }
 
+                    currentCardIndex++;
+                    if (currentCardIndex < sanaLista.size()) {
+                        wordLabel.setText(sanaLista.get(currentCardIndex));
+                    } else {
+                        finish();
+                    }
+                }
                 answerField.requestFocusInWindow();
             }
 
         });
         enterAnswerButton.addMouseListener(new MouseAdapter() {
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 enterAnswerButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR).darker());
@@ -320,5 +332,32 @@ public class InGameScreen extends JPanel {
         });
         timer.setRepeats(false);
         timer.start();
+    }
+
+    public void finish() {
+        String[] responses = { "Pelaa uudestaan", "Lopeta peli" };
+        int answer = JOptionPane.showOptionDialog(null,
+                "Olet pelannut " + game.getCountPlayedCards() + "/" + game.totalDeckSize()
+                        + ". Valitse toiminto seuraavista vaihtoehdoista",
+                "Pelin lopetus",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                responses,
+                responses[0]);
+        switch (answer) {
+            case JOptionPane.YES_OPTION:
+                kortit = game.getRandomCards(playSize);
+                sanaLista = new ArrayList<>(kortit.keySet());
+                kaannosLista = new ArrayList<>(kortit.values());
+                rightAnswer.setText("Oikein: " + game.getOikea());
+                wrongAnswer.setText("Oikein: " + game.getVaara());
+                leftQuestions.setText("Kortteja jäljellä: " + game.getJaljella());
+                break;
+            case JOptionPane.NO_OPTION:
+                JOptionPane.showMessageDialog(null, "Kiitos pelaamisesta!");
+                rootCardLayout.show(rootCards, ConstantValue.PLAYSCREEN_STRING);
+                break;
+        }
     }
 }

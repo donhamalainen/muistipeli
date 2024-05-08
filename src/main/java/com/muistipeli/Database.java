@@ -91,7 +91,9 @@ public class Database {
             stmt.setString(2, kaannos);
             stmt.setString(3, pakka);
             stmt.executeUpdate();
-            System.out.println("Kortti luotu onnistuneesti.");
+            System.out
+                    .println("Kortti " + "[sana=" + sana + ", käännös=" + kaannos + "] "
+                            + "luotu onnistuneesti pakkaan: " + pakka);
         } catch (SQLException e) {
             System.err.println("Virhe korttia luodessa: " + e.getMessage());
             throw e;

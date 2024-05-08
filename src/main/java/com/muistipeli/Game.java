@@ -13,14 +13,15 @@ public class Game {
     private int oikea = ConstantValue.DEFAULT_STATS_CORRECT;
     private int vaara = ConstantValue.DEFUALT_STATS_INCORRECT;
     private int jaljella = ConstantValue.DEFAULT_SIZE_OF_DECK;
-    private int pelatutKortit;
+    private HashMap<String, String> pelatutKortit = new HashMap<>();
     private HashMap<String, String> kortit = new HashMap<>();
     // DATABASE
     Database database = Database.getInstance();
 
     // Konstruktorit
-    public Game(String deckName) throws SQLException {
+    public Game(String deckName, int playSize) throws SQLException {
         startGame(deckName);
+        setJaljella(playSize);
     }
 
     /******** GAME START ********/
@@ -44,7 +45,6 @@ public class Game {
     public HashMap<String, String> getRandomCards(int shuffleCount) {
         HashMap<String, String> shuffledList = new HashMap<>();
         List<String> keys = new ArrayList<>(kortit.keySet());
-
         if (shuffleCount > kortit.size()) {
             shuffleCount = kortit.size();
         }
@@ -53,6 +53,8 @@ public class Game {
             int randomIndex = random.nextInt(keys.size());
             String selectedKey = keys.get(randomIndex);
             shuffledList.put(selectedKey, kortit.get(selectedKey));
+            pelatutKortit.put(selectedKey, kortit.get(selectedKey));
+
             keys.remove(randomIndex);
         }
 
@@ -61,7 +63,7 @@ public class Game {
 
     /******** GAME CARD ANSWER CHECKER ********/
     public boolean checkAnswer(String answer, String word) {
-        if (answer.equalsIgnoreCase(kortit.get(word))) {
+        if (answer.equalsIgnoreCase(pelatutKortit.get(word))) {
             oikea++;
             jaljella--;
             return true;
@@ -73,7 +75,7 @@ public class Game {
     }
 
     /******** GETTERS & SETTERS ********/
-    public int deckSize() {
+    public int totalDeckSize() {
         return kortit.size();
     }
 
@@ -106,7 +108,7 @@ public class Game {
         }
     }
 
-    public int getPelatutKortit() {
-        return pelatutKortit;
+    public int getCountPlayedCards() {
+        return pelatutKortit.size();
     }
 }

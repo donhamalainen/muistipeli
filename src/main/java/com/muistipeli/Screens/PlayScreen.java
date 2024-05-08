@@ -55,8 +55,6 @@ public class PlayScreen extends JPanel {
         try {
             if (database.hasPakka()) {
                 pakat = database.getAllPakka();
-            } else {
-                pakat = null;
             }
         } catch (Exception e) {
             System.err.println("Virhe 'PlayScreen:ssä' pakkoja haettaessa " + e.getMessage());
@@ -66,25 +64,18 @@ public class PlayScreen extends JPanel {
         }
     }
 
-    /******* SWITCHER *******/
-    private class Switcher implements ActionListener {
-        String screen;
-
-        Switcher(String selectedScreen) {
-            this.screen = selectedScreen;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            rootCardLayout.show(rootCards, screen);
-        }
-    }
-
     /******* ALUSTUS *******/
     private void run() {
         // TAKAISIN PAINIKE
         backButton = new JButton("Päävalikko");
-        backButton.addActionListener(new Switcher(ConstantValue.ROOTSCREEN_STRING));
+        backButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                rootScreen.initializeScreens(ConstantValue.ROOTSCREEN_STRING);
+            }
+
+        });
         backButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
         backButton.setPreferredSize(
                 new Dimension(ConstantValue.BACK_BUTTONS_SIZE_WIDTH, ConstantValue.BACK_BUTTONS_SIZE_HEIGHT));
@@ -117,7 +108,14 @@ public class PlayScreen extends JPanel {
 
         // MUOKKAA PAINIKE
         modifyButton = new JButton("Muokkaa pakkoja");
-        modifyButton.addActionListener(new Switcher(ConstantValue.DECKSCREEN_STRING));
+        modifyButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                rootScreen.initializeScreens(ConstantValue.DECKSCREEN_STRING);
+            }
+
+        });
         modifyButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
         modifyButton.setPreferredSize(
                 new Dimension(ConstantValue.BACK_BUTTONS_SIZE_WIDTH + 50, ConstantValue.BACK_BUTTONS_SIZE_HEIGHT));
@@ -144,8 +142,54 @@ public class PlayScreen extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    rootScreen.startGame(valittuPakka);
-                    rootCardLayout.show(rootCards, ConstantValue.IN_GAME_SCREEN_STRING);
+                    if (checkDeckValidity(valittuPakka)) {
+                        int korttiListaCount = database.getKortit(valittuPakka).size();
+                        while (true) {
+                            String input = JOptionPane.showInputDialog(
+                                    null,
+                                    "Kuinka monta korttia haluat pelata pakasta? (enintään "
+                                            + database.getKortit(valittuPakka).size() + ")",
+                                    "Valitse korttien määrä",
+                                    JOptionPane.QUESTION_MESSAGE);
+                            if (input == null) {
+                                break;
+                            }
+                            try {
+                                int inputValue = Integer.parseInt(input);
+                                if (inputValue > 0 && inputValue <= korttiListaCount) {
+                                    // Onnistunut
+                                    rootScreen.startGame(valittuPakka, inputValue);
+                                    rootCardLayout.show(rootCards, ConstantValue.IN_GAME_SCREEN_STRING);
+                                    break;
+                                } else {
+                                    JOptionPane.showMessageDialog(
+                                            null,
+                                            "Virheellinen määrä. Anna arvo 1 - " + korttiListaCount + " välillä.",
+                                            "Virhe",
+                                            JOptionPane.ERROR_MESSAGE);
+                                }
+                            } catch (NumberFormatException ex) {
+                                ex.printStackTrace();
+                                JOptionPane.showMessageDialog(null, "Syötä kelvollinen numero", "Virhe",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+
+                    } else {
+                        int response = JOptionPane.showConfirmDialog(
+                                null,
+                                "Tässä pakassa ei ole pelattavia kortteja. Haluatko luoda kortteja pakkaan?",
+                                "Virhe",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.ERROR_MESSAGE);
+
+                        if (response == JOptionPane.YES_OPTION) {
+                            rootScreen.initializeScreens(ConstantValue.DECKSCREEN_STRING);
+                        } else if (response == JOptionPane.NO_OPTION) {
+                            JOptionPane.getRootFrame().dispose();
+                        }
+                    }
+
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                     JOptionPane.showMessageDialog(null, "Virhe pelin aloittamisessa", "Virhe",
@@ -239,5 +283,19 @@ public class PlayScreen extends JPanel {
 
     public String getValittuPakka() {
         return this.valittuPakka;
+    }
+
+    /******* PAKAN TARKISTUS *******/
+    public boolean checkDeckValidity(String deckName) {
+        try {
+            if (!database.getKortit(deckName).isEmpty()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

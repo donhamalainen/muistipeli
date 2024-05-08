@@ -50,25 +50,6 @@ public class RootScreen extends JFrame {
         setLocationRelativeTo(null);
     }
 
-    /******* SWITCHER *******/
-    private class Switcher implements ActionListener {
-        String screen;
-
-        Switcher(String selectedScreen) {
-            this.screen = selectedScreen;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            rootCardLayout.show(rootCards, screen);
-        }
-
-    }
-
-    public void showScreen(String screenName) {
-        rootCardLayout.show(rootCards, screenName);
-    }
-
     /******* RUN *******/
     public void run() throws SQLException {
         // PANEELIT
@@ -94,16 +75,16 @@ public class RootScreen extends JFrame {
         JButton playButton = createButton(database.hasPakka() ? "Pelaa" : "Pakkoja ei ole luotu",
                 ConstantValue.PLAYSCREEN_STRING, 50, 250,
                 database.hasPakka() ? Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR) : Color.LIGHT_GRAY,
-                database.hasPakka() ? null : Color.GRAY, ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE);
+                database.hasPakka() ? null : Color.GRAY, ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE, this);
         playButton.setEnabled(database.hasPakka());
         buttonPanel.add(playButton);
         buttonPanel.add(createButton(database.hasPakka() ? "Muokkaa pakkoja" : "Luo pakkoja",
                 ConstantValue.DECKSCREEN_STRING, 50, 250,
                 Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR), null,
-                ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE));
+                ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE, this));
         buttonPanel.add(createButton("Ohjeet", ConstantValue.HELPSCREEN_STRING, 50, 250,
                 Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR), null,
-                ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE));
+                ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE, this));
 
         constraints = new GridBagConstraints();
         constraints.gridx = 0;
@@ -112,22 +93,22 @@ public class RootScreen extends JFrame {
 
         mainPanel.add(buttonPanel, constraints);
 
-        // Muiden paneelien alustus
-        PLAYSCREEN = new PlayScreen(rootCards, database, this);
-        DECKSCREEN = new DeckScreen(rootCards, database);
-        HELPSCREEN = new HelpScreen(rootCards);
-        rootCards.add(PLAYSCREEN, ConstantValue.PLAYSCREEN_STRING);
-        rootCards.add(DECKSCREEN, ConstantValue.DECKSCREEN_STRING);
-        rootCards.add(HELPSCREEN, ConstantValue.HELPSCREEN_STRING);
     }
 
     /* COMPONENTS */
-    private JButton createButton(final String text, String screen, int height, int width, final Color bgColor,
+    private JButton createButton(final String text, final String screen, int height, int width, final Color bgColor,
             Color foreColor,
-            int fontSize) throws SQLException {
+            int fontSize, final RootScreen rootScreen) throws SQLException {
         final JButton button = new JButton(text);
         button.setFont(new Font("Verdana", Font.PLAIN, fontSize));
-        button.addActionListener(new Switcher(screen));
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                initializeScreens(screen);
+            }
+
+        });
         button.setPreferredSize(new Dimension(width, height));
 
         if (bgColor != null) {
@@ -162,18 +143,39 @@ public class RootScreen extends JFrame {
         return button;
     }
 
-    /**
-     * 
-     * @param selectedDeck
-     * @throws SQLException
-     * 
-     *                      <p>
-     *                      startGame metodi alustaa InGameScreen:n ja lisää sen
-     *                      CardLayout:n sisälle [rootCards]
-     *                      </p
-     */
-    public void startGame(String selectedDeck) throws SQLException {
-        INGAMESCREEN = new InGameScreen(rootCards, selectedDeck);
+    /* initializeScreens */
+    public void startGame(String selectedDeck, int playSize) throws SQLException {
+        INGAMESCREEN = new InGameScreen(rootCards, selectedDeck, playSize);
         rootCards.add(INGAMESCREEN, ConstantValue.IN_GAME_SCREEN_STRING);
+    }
+
+    public void initializeScreens(String screen) {
+        try {
+            switch (screen) {
+                case ConstantValue.ROOTSCREEN_STRING:
+                    new RootScreen();
+                case ConstantValue.PLAYSCREEN_STRING:
+                    PLAYSCREEN = new PlayScreen(rootCards, database, this);
+                    rootCards.add(PLAYSCREEN, ConstantValue.PLAYSCREEN_STRING);
+                    rootCardLayout.show(rootCards, screen);
+                    break;
+                case ConstantValue.DECKSCREEN_STRING:
+                    DECKSCREEN = new DeckScreen(rootCards, database, this);
+                    rootCards.add(DECKSCREEN, ConstantValue.DECKSCREEN_STRING);
+                    rootCardLayout.show(rootCards, screen);
+                    break;
+                case ConstantValue.HELPSCREEN_STRING:
+                    HELPSCREEN = new HelpScreen(rootCards);
+                    rootCards.add(HELPSCREEN, ConstantValue.HELPSCREEN_STRING);
+                    rootCardLayout.show(rootCards, screen);
+                    break;
+                default:
+                    System.err.println("Parametri ei vastannut näkymien nimiä");
+                    break;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 }

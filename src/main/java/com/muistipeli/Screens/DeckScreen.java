@@ -21,13 +21,18 @@ public class DeckScreen extends JPanel {
     /******* ATTRIBUUTIT *******/
     // Attributes
     private String selectedDeck = null;
+    // [0] = sana & [1] = käännös
+    private String[] selectedWord = new String[2];
+
     // GridBagConstraints
     private GridBagConstraints constraints = new GridBagConstraints();
     // Database
     private Database database;
     // Root Attributes
     private JPanel rootCards;
+    @SuppressWarnings("unused")
     private CardLayout rootCardLayout;
+    private RootScreen rootScreen;
     // Scroll Attributes
     private JScrollPane scrollPane;
     private DefaultListModel<String> model;
@@ -40,13 +45,14 @@ public class DeckScreen extends JPanel {
     // Painikkeet
     JPanel pakkaHeaderPanel, korttiHeaderPanel;
     JLabel infoLabel;
-    JButton backButton, renameButton, modifyDeckButton;
+    JButton backButton, renameButton, modifyDeckButton, deleteCardButton;
 
     /******* KONSTRUKTORI *******/
-    public DeckScreen(JPanel cards, Database db) throws SQLException {
+    public DeckScreen(JPanel cards, Database db, RootScreen rootScreen) throws SQLException {
         this.rootCards = cards;
         rootCardLayout = (CardLayout) rootCards.getLayout();
         this.database = db;
+        this.rootScreen = rootScreen;
         initializePlayScreen();
         run();
     }
@@ -69,25 +75,17 @@ public class DeckScreen extends JPanel {
         }
     }
 
-    /******* SWITCHER *******/
-    private class Switcher implements ActionListener {
-        String screen;
-
-        Switcher(String selectedScreen) {
-            this.screen = selectedScreen;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            rootCardLayout.show(rootCards, screen);
-        }
-    }
-
     /******* ALUSTUS *******/
     private void run() {
         // TAKAISIN PAINIKE
         backButton = new JButton("Päävalikko");
-        backButton.addActionListener(new Switcher(ConstantValue.ROOTSCREEN_STRING));
+        backButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                rootScreen.initializeScreens(ConstantValue.ROOTSCREEN_STRING);
+            }
+        });
         backButton.setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
         backButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
         backButton.setPreferredSize(
@@ -319,25 +317,6 @@ public class DeckScreen extends JPanel {
             korttiLista.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             scrollPane.setViewportView(korttiLista);
 
-            if (kortit.isEmpty()) {
-                korttiLista.setEnabled(false);
-            } else {
-                korttiLista.setEnabled(true);
-                korttiLista.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        if (e.getClickCount() == 2) {
-                            String fullText = korttiLista.getModel()
-                                    .getElementAt(korttiLista.locationToIndex(e.getPoint()));
-                            String[] parts = fullText.split(" - ");
-                            String word = parts.length > 0 ? parts[0].substring(parts[0].indexOf('.') + 2) : "";
-                            String translation = parts.length > 1 ? parts[1] : "";
-                            popUP(word, translation, pakkaNimi);
-                        }
-                    }
-                });
-            }
-
             // Otsikkopaneeli
             korttiHeaderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             korttiHeaderPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -387,26 +366,85 @@ public class DeckScreen extends JPanel {
             korttiHeaderPanel.add(createNewCardButton);
 
             // luo uusikortit
-            JButton deleteCardButton = new JButton("Poista kortti");
-
-            deleteCardButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-
-                }
-
-            });
-
+            deleteCardButton = new JButton("Poista kortti");
+            deleteCardButton.setEnabled(false);
             deleteCardButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
             deleteCardButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
             deleteCardButton.setPreferredSize(new Dimension(ConstantValue.SCROL_LIST_HEADER_BUTTONS_SIZE_WIDTH,
                     ConstantValue.SCROL_LIST_HEADER_BUTTONS_SIZE_HEIGHT));
             deleteCardButton.setBorderPainted(false);
             deleteCardButton.setOpaque(true);
-            deleteCardButton.setBackground(Color.orange);
+            deleteCardButton.setBackground(Color.LIGHT_GRAY);
             deleteCardButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             deleteCardButton.setFocusPainted(false);
+
+            deleteCardButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        if (selectedWord[0] == null || selectedWord[1] == null) {
+                            JOptionPane.showMessageDialog(null, "Valitse poistettava kortti",
+                                    "Virhe",
+                                    JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            if (database.deleteKortti(selectedWord[0], selectedWord[1])) {
+                                refreshCardScrollPane(pakkaNimi);
+                                deleteCardButton.setBackground(Color.LIGHT_GRAY);
+                            } else {
+                                throw new SQLException("Tuntematon virhe poistettaessa korttia.");
+                            }
+                        }
+
+                    } catch (SQLException ex) {
+                        JOptionPane.showMessageDialog(null, "Kortin poistaminen epäonnistui: " + ex.getMessage(),
+                                "Virhe",
+                                JOptionPane.ERROR_MESSAGE);
+                        ex.printStackTrace();
+
+                    }
+                }
+
+            });
+
             korttiHeaderPanel.add(deleteCardButton);
+
+            if (kortit.isEmpty()) {
+                korttiLista.setEnabled(false);
+            } else {
+                korttiLista.setEnabled(true);
+                korttiLista.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if (e.getClickCount() == 2) {
+                            String fullText = korttiLista.getModel()
+                                    .getElementAt(korttiLista.locationToIndex(e.getPoint()));
+                            String[] parts = fullText.split(" - ");
+                            selectedWord[0] = parts.length > 0 ? parts[0].substring(parts[0].indexOf('.') + 2) : "";
+                            selectedWord[1] = parts.length > 1 ? parts[1] : "";
+                            popUP(selectedWord[0], selectedWord[1], pakkaNimi);
+                        }
+                    }
+                });
+
+                korttiLista.addListSelectionListener(new ListSelectionListener() {
+
+                    @Override
+                    public void valueChanged(ListSelectionEvent e) {
+                        String kortti = korttiLista.getSelectedValue();
+                        if (e.getValueIsAdjusting()) {
+                            if (kortti != null) {
+                                String[] parts = kortti.split(" - ");
+                                selectedWord[0] = parts.length > 0 ? parts[0].substring(parts[0].indexOf('.') + 2) : "";
+                                selectedWord[1] = parts.length > 1 ? parts[1] : "";
+                                System.out.println(selectedWord[0] + " " + selectedWord[1]);
+                                deleteCardButton.setEnabled(true);
+                                deleteCardButton.setBackground(Color.ORANGE);
+                            }
+                        }
+                    }
+
+                });
+            }
 
             scrollPane.setColumnHeaderView(korttiHeaderPanel);
         } catch (SQLException ex) {
@@ -427,13 +465,12 @@ public class DeckScreen extends JPanel {
 
         JButton okButton = new JButton("Vahvista");
         JButton cancelButton = new JButton("Peruuta");
-        JButton deleteButton = new JButton("Poista");
 
         final JOptionPane optionPane = new JOptionPane(message,
                 JOptionPane.PLAIN_MESSAGE,
                 JOptionPane.YES_NO_CANCEL_OPTION,
                 null,
-                new Object[] { okButton, cancelButton, deleteButton },
+                new Object[] { okButton, cancelButton },
                 okButton);
 
         final JDialog dialog = optionPane.createDialog(this, "Muokkaa korttia");
@@ -454,25 +491,6 @@ public class DeckScreen extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dialog.dispose();
-            }
-
-        });
-        deleteButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    if (database.deleteKortti(oldWord, oldTranslation)) {
-                        refreshCardScrollPane(pakkaNimi);
-                        dialog.dispose();
-                    } else {
-                        throw new SQLException("Tuntematon virhe poistettaessa korttia.");
-                    }
-                } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(dialog, "Kortin poistaminen epäonnistui: " + ex.getMessage(), "Virhe",
-                            JOptionPane.ERROR_MESSAGE);
-                    ex.printStackTrace();
-
-                }
             }
 
         });
@@ -684,6 +702,7 @@ public class DeckScreen extends JPanel {
 
     /******** REFRESH ********/
     private void refreshCardScrollPane(final String pakkaNimi) throws SQLException {
+        korttiLista.setEnabled(false);
         kortit = database.getKortit(pakkaNimi);
         korttiModel = new DefaultListModel<>();
         int count = 1;
@@ -692,8 +711,10 @@ public class DeckScreen extends JPanel {
                 korttiModel.addElement(count + ". " + entry.getKey() + " - " + entry.getValue());
                 count++;
             }
+            korttiLista.setEnabled(true);
         } else {
             korttiModel.addElement("Kortteja ei ole vielä lisätty tähän pakkaan");
+            korttiLista.setEnabled(false);
         }
 
         if (kortit.isEmpty()) {
@@ -701,6 +722,44 @@ public class DeckScreen extends JPanel {
         }
 
         korttiLista.setModel(korttiModel);
+
+        // Hiiren kuuntelija
+        korttiLista.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && korttiLista.isEnabled()) {
+                    int index = korttiLista.locationToIndex(e.getPoint());
+                    if (index >= 0) {
+                        String fullText = korttiLista.getModel()
+                                .getElementAt(korttiLista.locationToIndex(e.getPoint()));
+                        String[] parts = fullText.split(" - ");
+                        selectedWord[0] = parts.length > 0 ? parts[0].substring(parts[0].indexOf('.') + 2) : "";
+                        selectedWord[1] = parts.length > 1 ? parts[1] : "";
+                        popUP(selectedWord[0], selectedWord[1], pakkaNimi);
+                    }
+                }
+            }
+        });
+
+        korttiLista.addListSelectionListener(new ListSelectionListener() {
+
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                String kortti = korttiLista.getSelectedValue();
+                if (e.getValueIsAdjusting() && korttiLista.isEnabled()) {
+                    if (kortti != null) {
+                        String[] parts = kortti.split(" - ");
+                        selectedWord[0] = parts.length > 0 ? parts[0].substring(parts[0].indexOf('.') + 2) : "";
+                        selectedWord[1] = parts.length > 1 ? parts[1] : "";
+                        System.out.println(selectedWord[0] + " " + selectedWord[1]);
+                        deleteCardButton.setEnabled(true);
+                        deleteCardButton.setBackground(Color.ORANGE);
+                    }
+                }
+            }
+
+        });
+
         scrollPane.setViewportView(korttiLista);
     }
 
