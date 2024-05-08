@@ -38,6 +38,9 @@ public class PlayScreen extends JPanel {
     // Painikkeet
     JButton playPanel, backButton, modifyButton;
 
+    //Peli
+    Game game;
+
     /******* KONSTRUKTORI *******/
     public PlayScreen(JPanel cards, Database db) throws SQLException {
         this.rootCards = cards;
@@ -47,7 +50,76 @@ public class PlayScreen extends JPanel {
         run();
     }
 
+    //PELIRUUTU
+/*      public PlayScreen() throws SQLException{
+        
+        game = new Game(getValittuPakka());
+        GridBagConstraints c = new GridBagConstraints();
+        c = new GridBagConstraints();
+        setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
+        setLayout(new GridBagLayout());
+        setVisible(true);
+        addInfoPanel();
+    } 
     
+        // Vasemman reunan infopaneelin lisääminen
+    private void addInfoPanel() {
+        
+        GridBagConstraints c = new GridBagConstraints();
+        JLabel oikea, vaara, jaljella;
+       JPanel infoPanel = new JPanel(new GridBagLayout());
+        infoPanel.setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
+        // GBC ALUSTUS
+        c = new GridBagConstraints();
+
+        // LABELEITTEN ALUSTUS JA LISÄÄMINEN INFOPANEELIIN
+        oikea = new JLabel("Oikein: " + game.getOikea());
+        vaara = new JLabel("Väärin: " + game.getVaara());
+        jaljella = new JLabel("Kortteja jäljellä: " + game.getJaljella());
+
+        c.gridy = 0;
+        infoPanel.add(oikea, c);
+        // Oikea labelin alapuolelle
+
+        c.gridy = 1;
+        infoPanel.add(vaara, c);
+        // Väärin labelin alapuolelle
+        c.gridy = 2;
+        infoPanel.add(jaljella, c);
+        infoPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+        // POISTU NÄPPÄIMEN LISÄÄMINEN PANEELIIN
+
+        JButton lopeta = new JButton("Lopeta peli");
+        
+        lopeta.setFont(new Font("Arial", Font.PLAIN, ConstantValue.DEFAULT_PLAY_BUTTON_SIZE));
+        lopeta.setFocusable(false);
+        lopeta.setPreferredSize(
+                new Dimension(200, 40));
+        lopeta.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Infopanelin pohjalle
+        c.gridy = 3;
+        c.insets = new Insets(150, 30, 0, 30);
+
+        infoPanel.add(lopeta, c);
+
+        // Asetetaan infopanel game screen paneelin vasempaan reunaan
+        // Alustetaan GBC
+        c = new GridBagConstraints();
+
+        // Ankkuroidaan vasempaan reunaan
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 0;
+        c.weighty = 1;
+
+        c.fill = GridBagConstraints.VERTICAL;
+        c.anchor = GridBagConstraints.WEST;
+        this.add(infoPanel, c);
+    }
+ */
 
     /******* ALUSTUS *******/
     private void initializePlayScreen() throws SQLException {
@@ -146,6 +218,7 @@ public class PlayScreen extends JPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                
                 rootCardLayout.show(rootCards, ConstantValue.IN_GAME_SCREEN_STRING);
 /*                 try {
                     Game game = new Game(getValittuPakka());

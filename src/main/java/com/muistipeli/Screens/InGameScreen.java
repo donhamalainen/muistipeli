@@ -39,8 +39,12 @@ public class InGameScreen extends JPanel implements ActionListener {
         setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
         setLayout(new GridBagLayout());
         setVisible(true);
-        addInfoPanel();
-        addGameComponents();
+        JLabel teksti = new JLabel("TESTI");
+        c.gridx = 1;
+        c.anchor = GridBagConstraints.CENTER;
+        add(teksti, c);
+/*         addInfoPanel();
+        addGameComponents(); */
 
     }
 
