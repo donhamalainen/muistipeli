@@ -4,9 +4,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.*;
@@ -15,13 +13,13 @@ import javax.swing.event.ListSelectionListener;
 
 import com.muistipeli.ConstantValue;
 import com.muistipeli.Database;
-import com.muistipeli.Game;
 
 public class PlayScreen extends JPanel {
 
     /******* ATTRIBUUTIT *******/
     // Attribuutit
     private String valittuPakka;
+    private RootScreen rootScreen;
     // GridBagConstraints
     private GridBagConstraints constraints = new GridBagConstraints();
     // Database
@@ -39,15 +37,14 @@ public class PlayScreen extends JPanel {
     JButton playPanel, backButton, modifyButton;
 
     /******* KONSTRUKTORI *******/
-    public PlayScreen(JPanel cards, Database db) throws SQLException {
+    public PlayScreen(JPanel cards, Database db, RootScreen rootScreen) throws SQLException {
         this.rootCards = cards;
         rootCardLayout = (CardLayout) rootCards.getLayout();
         this.database = db;
+        this.rootScreen = rootScreen;
         initializePlayScreen();
         run();
     }
-
-    
 
     /******* ALUSTUS *******/
     private void initializePlayScreen() throws SQLException {
@@ -88,7 +85,7 @@ public class PlayScreen extends JPanel {
         // TAKAISIN PAINIKE
         backButton = new JButton("Päävalikko");
         backButton.addActionListener(new Switcher(ConstantValue.ROOTSCREEN_STRING));
-        backButton.setFont(new Font("Arial", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
+        backButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
         backButton.setPreferredSize(
                 new Dimension(ConstantValue.BACK_BUTTONS_SIZE_WIDTH, ConstantValue.BACK_BUTTONS_SIZE_HEIGHT));
         backButton.setBorderPainted(false);
@@ -121,7 +118,7 @@ public class PlayScreen extends JPanel {
         // MUOKKAA PAINIKE
         modifyButton = new JButton("Muokkaa pakkoja");
         modifyButton.addActionListener(new Switcher(ConstantValue.DECKSCREEN_STRING));
-        modifyButton.setFont(new Font("Arial", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
+        modifyButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
         modifyButton.setPreferredSize(
                 new Dimension(ConstantValue.BACK_BUTTONS_SIZE_WIDTH + 50, ConstantValue.BACK_BUTTONS_SIZE_HEIGHT));
         modifyButton.setBorderPainted(false);
@@ -146,17 +143,18 @@ public class PlayScreen extends JPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                rootCardLayout.show(rootCards, ConstantValue.IN_GAME_SCREEN_STRING);
                 try {
-                    Game game = new Game(getValittuPakka());
+                    rootScreen.startGame(valittuPakka);
+                    rootCardLayout.show(rootCards, ConstantValue.IN_GAME_SCREEN_STRING);
                 } catch (SQLException e1) {
-                    // TODO Auto-generated catch block
                     e1.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "Virhe pelin aloittamisessa", "Virhe",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             }
-            
+
         });
-        playPanel.setFont(new Font("Arial", Font.PLAIN, ConstantValue.DEFAULT_PLAY_BUTTON_SIZE));
+        playPanel.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.DEFAULT_PLAY_BUTTON_SIZE));
         playPanel.setPreferredSize(
                 new Dimension(ConstantValue.BACK_BUTTONS_SIZE_WIDTH, ConstantValue.BACK_BUTTONS_SIZE_HEIGHT));
         playPanel.setBorderPainted(false);
@@ -181,9 +179,11 @@ public class PlayScreen extends JPanel {
     private void pakkojenListaus() {
         try {
             model = new DefaultListModel<>();
+            int count = 1;
             if (!pakat.isEmpty()) {
                 for (Map.Entry<String, String> pakka : pakat.entrySet()) {
-                    model.addElement(pakka.getKey() + ". " + (String) pakka.getValue());
+                    model.addElement(count + ". " + (String) pakka.getValue());
+                    count++;
                 }
             } else {
                 model.addElement("Et ole vielä luonut pelattavia pakkoja");
@@ -191,7 +191,7 @@ public class PlayScreen extends JPanel {
 
             pakkaLista = new JList<>(model);
             pakkaLista.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-            pakkaLista.setFont(new Font("Arial", Font.ITALIC, 16));
+            pakkaLista.setFont(new Font("Verdana", Font.ITALIC, 16));
             pakkaLista.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
             scrollPane = new JScrollPane(pakkaLista);
@@ -228,7 +228,6 @@ public class PlayScreen extends JPanel {
                     String pakkaNimi = pakkaLista.getSelectedValue();
                     if (pakkaNimi != null) {
                         valittuPakka = pakkaNimi.substring(pakkaNimi.indexOf('.') + 2);
-                        System.out.println(valittuPakka);
                         playPanel.setEnabled(true);
                         playPanel.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
                         playPanel.setForeground(Color.BLACK);

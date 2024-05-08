@@ -3,259 +3,322 @@ package com.muistipeli.Screens;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.*;
+import javax.swing.border.MatteBorder;
 
 import com.muistipeli.ConstantValue;
 import com.muistipeli.Game;
 
-public class InGameScreen extends JPanel implements ActionListener {
+public class InGameScreen extends JPanel {
 
     /******* ATTRIBUUTIT *******/
-    private GridBagConstraints c;
-
-    /******* UI KOMPONENTIT *******/
-    private JLabel oikea, vaara, jaljella, sana;
-    private JTextField vastausKentta;
-    private JPanel infoPanel;
-    private JButton lopeta, enterAnswerButton;
+    // Others
+    private Game game;
+    // Attributes
+    private int currentCardIndex = 0;
+    // GridBagConstraints
+    private GridBagConstraints constraints = new GridBagConstraints();
+    // Root Attributes
     private JPanel rootCards;
     private CardLayout rootCardLayout;
-    private PlayScreen playScreen;
-    private Game game;
+    // Paneelit
+    private JPanel leftPanel, rightPanel, statisticPanel, answerPanel;
+    // Kortit
+    private HashMap<String, String> kortit = new HashMap<>();
+    private java.util.List<String> sanaLista;
+    private java.util.List<String> kaannosLista;
+    // Labels
+    JLabel rightAnswer, wrongAnswer, leftQuestions;
+    // Painikkeet
+    private JButton enterAnswerButton;
 
-    /*******
-     * KONSTRUKTORI
-     * 
-     * @throws SQLException
-     *******/
-
-    public InGameScreen(JPanel cards, PlayScreen playScreen) throws SQLException {
+    /******* KONSTRUKTORI *******/
+    public InGameScreen(JPanel cards, String deckName) throws SQLException {
         this.rootCards = cards;
         rootCardLayout = (CardLayout) rootCards.getLayout();
-        this.playScreen = playScreen;
-
-        c = new GridBagConstraints();
-        setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
-        setLayout(new GridBagLayout());
-        setVisible(true);
-        // addInfoPanel();
-        // addGameComponents();
+        game = new Game(deckName);
+        kortit = game.getRandomCards(ConstantValue.DEFAULT_SIZE_OF_DECK);
+        sanaLista = new ArrayList<>(kortit.keySet());
+        kaannosLista = new ArrayList<>(kortit.values());
+        initializeInGameScreen();
+        run();
     }
 
-    /******* SWITCHER *******/
-    private class Switcher implements ActionListener {
-        String screen;
-
-        Switcher(String selectedScreen) {
-            this.screen = selectedScreen;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            rootCardLayout.show(rootCards, screen);
-        }
+    /******* ALUSTUS *******/
+    private void initializeInGameScreen() throws SQLException {
+        setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
+        setLayout(new GridBagLayout());
     }
 
     /******* ALUSTUS *******/
     private void run() {
+        // Vasen paneeli
+        leftPanel = new JPanel(new GridBagLayout());
+        leftPanel.setBorder(new MatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY));
+        leftPanel.setPreferredSize(new Dimension(250, getHeight()));
 
+        constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.weightx = 0;
+        constraints.weighty = 1;
+        constraints.fill = GridBagConstraints.VERTICAL;
+        constraints.anchor = GridBagConstraints.WEST;
+
+        constraints.fill = GridBagConstraints.VERTICAL;
+        add(leftPanel, constraints);
+
+        // Oikea paneeli
+        rightPanel = new JPanel(new GridBagLayout());
+
+        constraints = new GridBagConstraints();
+        constraints.gridx = 1;
+        constraints.gridy = 0;
+        constraints.weightx = 1;
+        constraints.weighty = 1;
+        constraints.fill = GridBagConstraints.BOTH;
+
+        add(rightPanel, constraints);
+
+        // Määritellään paneelien sisältö
+        statisticUI();
+        answerUI();
     }
 
-    // Vasemman reunan infopaneelin lisääminen
-    private void addInfoPanel() {
-        infoPanel = new JPanel(new GridBagLayout());
-        infoPanel.setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
-        // GBC ALUSTUS
-        c = new GridBagConstraints();
+    /******* PELI *******/
 
-        // LABELEITTEN ALUSTUS JA LISÄÄMINEN INFOPANEELIIN
-        oikea = new JLabel("Oikein: " + game.getOikea());
-        vaara = new JLabel("Väärin: " + game.getVaara());
-        jaljella = new JLabel("Kortteja jäljellä: " + game.getJaljella());
+    private void statisticUI() {
+        // Paneeli
+        statisticPanel = new JPanel(new GridBagLayout());
+        statisticPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        statisticPanel.setBackground(Color.decode(ConstantValue.STATISTIC_BACKGROUND_COLOR));
 
-        c.gridy = 0;
-        infoPanel.add(oikea, c);
-        // Oikea labelin alapuolelle
+        // JLabel
+        rightAnswer = new JLabel("Oikein: " + game.getOikea(), JLabel.LEFT);
+        wrongAnswer = new JLabel("Väärin: " + game.getVaara(), JLabel.LEFT);
+        leftQuestions = new JLabel("Kortteja jäljellä: " + game.getJaljella(), JLabel.LEFT);
 
-        c.gridy = 1;
-        infoPanel.add(vaara, c);
-        // Väärin labelin alapuolelle
-        c.gridy = 2;
-        infoPanel.add(jaljella, c);
-        infoPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        rightAnswer.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.ANSWER_LABEL_FONT_SIZE));
+        wrongAnswer.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.ANSWER_LABEL_FONT_SIZE));
+        leftQuestions.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.ANSWER_LABEL_FONT_SIZE));
 
-        // POISTU NÄPPÄIMEN LISÄÄMINEN PANEELIIN
+        constraints = new GridBagConstraints();
+        constraints.insets = new Insets(0, 10, 10, 0);
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.weightx = 1;
+        constraints.anchor = GridBagConstraints.WEST;
 
-        lopeta = new JButton("Lopeta peli");
-        lopeta.addActionListener(this);
-        lopeta.setFont(new Font("Arial", Font.PLAIN, ConstantValue.DEFAULT_PLAY_BUTTON_SIZE));
-        lopeta.setFocusable(false);
-        lopeta.setPreferredSize(
-                new Dimension(200, 40));
-        lopeta.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        constraints.gridy = 0;
+        statisticPanel.add(rightAnswer, constraints);
+        constraints.gridy = 1;
+        statisticPanel.add(wrongAnswer, constraints);
+        constraints.gridy = 2;
+        statisticPanel.add(leftQuestions, constraints);
 
-        // Infopanelin pohjalle
-        c.gridy = 3;
-        c.insets = new Insets(150, 30, 0, 30);
-
-        infoPanel.add(lopeta, c);
-
-        // Asetetaan infopanel game screen paneelin vasempaan reunaan
-        // Alustetaan GBC
-        c = new GridBagConstraints();
-
-        // Ankkuroidaan vasempaan reunaan
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 0;
-        c.weighty = 1;
-
-        c.fill = GridBagConstraints.VERTICAL;
-        c.anchor = GridBagConstraints.WEST;
-        this.add(infoPanel, c);
-    }
-
-    // Lisää vastauskentän ja kysytyn sanan
-    private void addGameComponents() {
-
-        // Luodaan paneeli johon lisätään pelikomponentit
-        JPanel gamePanel = new JPanel();
-        gamePanel.setLayout(new GridBagLayout());
-        gamePanel.setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
-
-        // GBC ALUSTUS
-        c = new GridBagConstraints();
-        sana = new JLabel(game.getRandomWord());
-        sana.setFont(new Font("Arial", Font.BOLD, 24));
-        sana.setPreferredSize(new Dimension(200, 100));
-        sana.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
-        vastausKentta = new JTextField("Syötä vastaus");
-        vastausKentta.setPreferredSize(new Dimension(200, 30));
-        vastausKentta.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
-        vastausKentta.addFocusListener(new FocusListener() {
-
-            // Otetaan "Syötä vastaus" teksti pois jos vastauskenttä on valittuna
+        final JButton endGameButton = new JButton("Lopeta peli");
+        endGameButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.IN_GAME_SCREEN_END_BUTTON_SIZE));
+        endGameButton.addActionListener(new ActionListener() {
             @Override
-            public void focusGained(FocusEvent e) {
-                if (vastausKentta.getText().equals("Syötä vastaus")) {
-                    vastausKentta.setText("");
+            public void actionPerformed(ActionEvent e) {
+                String[] responses = { "Kyllä", "Ei" };
+                int answer = JOptionPane.showOptionDialog(null,
+                        "Haluatko varmasti lopettaa pelin?",
+                        "Exit",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE, null, responses, responses[1]);
+                if (answer == JOptionPane.YES_OPTION) {
+                    game.endGame();
+                    rootCardLayout.show(rootCards, ConstantValue.PLAYSCREEN_STRING);
+                } else if (answer == JOptionPane.NO_OPTION) {
+                    JOptionPane.getRootFrame().dispose();
                 }
             }
+        });
 
-            // Jos tekstikenttä ei ole valittuna "Syötä vastaus" laitetaan näkyviin
+        endGameButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        endGameButton.setPreferredSize(new Dimension(getWidth(), 40));
+        endGameButton.setFocusPainted(false);
+        endGameButton.setBackground(Color.decode("#ffcccc"));
+        endGameButton.setBorderPainted(false);
+        endGameButton.setOpaque(true);
+        endGameButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+
+        endGameButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void focusLost(FocusEvent e) {
-                if (vastausKentta.getText().isEmpty()) {
-                    vastausKentta.setText("Syötä vastaus");
+            public void mouseEntered(MouseEvent e) {
+                endGameButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR).darker());
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                endGameButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+            }
+        });
+
+        constraints.gridy = 3;
+        constraints.insets = new Insets(20, 10, 10, 0);
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.anchor = GridBagConstraints.WEST;
+
+        statisticPanel.add(endGameButton, constraints);
+
+        constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.anchor = GridBagConstraints.WEST;
+        constraints.weightx = 1;
+        constraints.weighty = 1;
+
+        // Lisäys
+        leftPanel.add(statisticPanel, constraints);
+
+    }
+
+    private void answerUI() {
+        // Paneeli
+        answerPanel = new JPanel(new GridBagLayout());
+        answerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 150, 20));
+        answerPanel.setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
+
+        final JLabel wordLabel = new JLabel(sanaLista.get(currentCardIndex), JLabel.CENTER);
+        final JTextField answerField = new JTextField(25);
+        answerField.setPreferredSize(new Dimension(getWidth(), 50));
+        answerField.setBorder(
+                BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY),
+                        BorderFactory.createEmptyBorder(0, 20, 0, 20)));
+
+        enterAnswerButton = new JButton("Vastaus");
+        enterAnswerButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        enterAnswerButton.setPreferredSize(new Dimension(getWidth(), 50));
+        enterAnswerButton.setBorderPainted(false);
+        enterAnswerButton.setOpaque(true);
+        enterAnswerButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+        enterAnswerButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        enterAnswerButton.setFocusPainted(false);
+
+        enterAnswerButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                if (game.checkAnswer(answerField.getText(), sanaLista.get(currentCardIndex))) {
+                    currentCardIndex++;
+                    answerField.setText("");
+                    wordLabel.setText(sanaLista.get(currentCardIndex));
+                    rightAnswer.setText("Oikein: " + game.getOikea());
+                    leftQuestions.setText("Kortteja jäljellä: " + game.getJaljella());
+                } else {
+                    showAnswer();
+                    currentCardIndex++;
+                    answerField.setText("");
+                    wordLabel.setText(sanaLista.get(currentCardIndex));
+                    wrongAnswer.setText("Väärin: " + game.getVaara());
+                    leftQuestions.setText("Kortteja jäljellä: " + game.getJaljella());
                 }
+
+                answerField.requestFocusInWindow();
             }
 
         });
-
-        vastausKentta.addActionListener(this);
-        gamePanel.add(sana, c);
-        // Asetetaan vastauskenttä kysytyn sanan alapuolelle
-        c.gridy = 1;
-        c.insets = new Insets(50, 0, 0, 0);
-        gamePanel.add(vastausKentta, c);
-
-        // Vastauksen syöttö näppäin
-        enterAnswerButton = new JButton("->");
-        enterAnswerButton.setPreferredSize(new Dimension(50, 30));
-        enterAnswerButton.setFocusable(false);
-        enterAnswerButton.addActionListener(this);
-        c.gridx = 1;
-        gamePanel.add(enterAnswerButton, c);
-        // Asetetaan paneelin sijainniksi keskikohta
-        c.gridx = 1;
-        c.gridy = 0;
-        c.weightx = 1;
-        c.weighty = 1;
-        c.anchor = GridBagConstraints.CENTER;
-
-        // Lisätään pelikomponentti paneeli pääpaneeliin
-        this.add(gamePanel, c);
-    }
-
-    public void refreshUI() {
-        oikea.setText("Oikein: " + game.getOikea());
-        vaara.setText("Väärin:" + game.getVaara());
-        jaljella.setText("Kortteja jäljellä: " + game.getJaljella() + "/" + "15");
-        sana.setText(game.getRandomWord());
-        vastausKentta.setText("");
-    }
-
-    public void endingScreen() {
-        String[] responses = { "Palaa päävalikkoon", "Valitse uusi pakka", "Pelaa uudestaan" };
-        int answer = JOptionPane.showOptionDialog(null,
-                "Olet pelannut " + game.getPelatutKortit() + "/" + game.deckSize()
-                        + " korttia haluatko palata päävalikkoon?",
-                "Pelin lopetus",
-                JOptionPane.YES_NO_CANCEL_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                responses,
-                null);
-
-        if (answer == 0) {
-            rootCardLayout.show(rootCards, ConstantValue.ROOTSCREEN_STRING);
-        }
-        if (answer == 1) {
-            rootCardLayout.show(rootCards, ConstantValue.PLAYSCREEN_STRING);
-        }
-        if (answer == 2) {
-            try {
-                game = new Game("suomi");
-                refreshUI();
-            } catch (SQLException e) {
-                System.out.println("SQL ERROR: ");
-                e.printStackTrace();
+        enterAnswerButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                enterAnswerButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR).darker());
             }
-        }
 
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == lopeta) {
-            String[] responses = { "Kyllä", "Ei" };
-            int answer = JOptionPane.showOptionDialog(null,
-                    "Haluatko varmasti lopettaa pelin?",
-                    "Exit",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE, null, responses, null);
-            if (answer == 0) {
-                rootCardLayout.show(rootCards, ConstantValue.ROOTSCREEN_STRING);
+            @Override
+            public void mouseExited(MouseEvent e) {
+                enterAnswerButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
             }
-        } else if (e.getSource() == vastausKentta || e.getSource() == enterAnswerButton) {
+        });
 
-            String message; // Käyttäjälle ilmoitus tuloksesta
-            if (game.checkAnswer(vastausKentta.getText())) {
-                // OIKEA VASTAUS ILMOITUS
-                message = "Vastasit oikein!\nOikea vastaus oli: " + game.getCorrectAnswer();
-            } else {
-                // VÄÄRÄ VASTAUS ILMOITUS
-                message = "Väärä vastaus\nOikea vastaus oli: " + game.getCorrectAnswer();
-            }
-            Timer timer = new Timer(1500, new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    JOptionPane.getRootFrame().dispose();
+        answerField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    enterAnswerButton.doClick();
                 }
-
-            });
-            timer.setRepeats(false);
-            timer.start();
-            JOptionPane.showMessageDialog(null, message);
-            refreshUI();
-            if (game.endGame() == true) {
-                endingScreen();
             }
-        }
+        });
+
+        wordLabel.setFont(new Font("Verdana", Font.BOLD, 34));
+        answerField.setFont(new Font("Verdana", Font.PLAIN, 14));
+        enterAnswerButton.setFont(new Font("Verdana", Font.PLAIN, 14));
+
+        // Lisätään "Kortin sana" -kenttä
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.weightx = 1;
+        constraints.weighty = 1;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.anchor = GridBagConstraints.CENTER;
+        answerPanel.add(wordLabel, constraints);
+
+        // Lisätään vastauskenttä
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.weightx = 0;
+        constraints.weighty = 0;
+        constraints.anchor = GridBagConstraints.CENTER;
+        constraints.insets = new Insets(0, 0, 20, 0);
+        answerPanel.add(answerField, constraints);
+
+        // Lisätään vastauspainike
+        constraints.gridx = 0;
+        constraints.gridy = 2;
+        constraints.weightx = 0;
+        constraints.weighty = 0;
+        constraints.anchor = GridBagConstraints.CENTER;
+        answerPanel.add(enterAnswerButton, constraints);
+
+        // Lopetus lisäys
+        constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.anchor = GridBagConstraints.CENTER;
+        constraints.weightx = 1;
+        constraints.weighty = 1;
+
+        rightPanel.add(answerPanel, constraints);
+
+    }
+
+    private void showAnswer() {
+        enterAnswerButton.setEnabled(false);
+        enterAnswerButton.setBackground(Color.LIGHT_GRAY);
+        enterAnswerButton.setForeground(Color.GRAY);
+        final JDialog dialog = new JDialog();
+        dialog.setAlwaysOnTop(true);
+        dialog.setUndecorated(true);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.setType(Window.Type.POPUP);
+
+        JOptionPane optionPane = new JOptionPane(
+                "Vastaus on: " + kaannosLista.get(currentCardIndex),
+                JOptionPane.INFORMATION_MESSAGE,
+                JOptionPane.DEFAULT_OPTION,
+                null, new Object[] {}, null);
+
+        dialog.setContentPane(optionPane);
+
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+
+        Timer timer = new Timer(2000, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                enterAnswerButton.setEnabled(true);
+                enterAnswerButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+                enterAnswerButton.setForeground(Color.BLACK);
+                dialog.dispose();
+            }
+        });
+        timer.setRepeats(false);
+        timer.start();
     }
 }

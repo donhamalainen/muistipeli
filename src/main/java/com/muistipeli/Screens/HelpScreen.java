@@ -18,10 +18,11 @@ public class HelpScreen extends JPanel {
     private JButton backButton;
     private GridBagConstraints constraints;
     private JLabel ohjeet;
+
     /******* KONSTRUKTORI *******/
     public HelpScreen(JPanel cards) throws SQLException {
         this.rootCards = cards;
-        
+
         rootCardLayout = (CardLayout) rootCards.getLayout();
         this.setLayout(new GridBagLayout());
         addBackButton();
@@ -55,13 +56,12 @@ public class HelpScreen extends JPanel {
 
     }
 
-    private void addBackButton(){
-
+    private void addBackButton() {
 
         backButton = new JButton("Päävalikko");
         backButton.addActionListener(new Switcher(ConstantValue.ROOTSCREEN_STRING));
         backButton.setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
-        backButton.setFont(new Font("Arial", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
+        backButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
         backButton.setPreferredSize(
                 new Dimension(ConstantValue.BACK_BUTTONS_SIZE_WIDTH, ConstantValue.BACK_BUTTONS_SIZE_HEIGHT));
         backButton.setBorderPainted(false);
@@ -69,7 +69,6 @@ public class HelpScreen extends JPanel {
         backButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
         backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         backButton.setFocusPainted(false);
-
 
         constraints = new GridBagConstraints();
         constraints.anchor = GridBagConstraints.NORTHWEST;

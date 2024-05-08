@@ -138,17 +138,20 @@ public class Database {
     /********* Poista kortti kokonaisuus *********/
     public boolean deleteKortti(String sana, String kaannos) throws SQLException {
         String deleteSQL = "DELETE FROM kortit  WHERE sana = ? AND kaannos = ?";
+        dbConnection.setAutoCommit(false);
         try (PreparedStatement pstmt = dbConnection.prepareStatement(deleteSQL)) {
             pstmt.setString(1, sana);
             pstmt.setString(2, kaannos);
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
                 System.out.println("Kortti poistettiin onnistuneesti");
+                dbConnection.commit();
                 return true;
             } else {
                 throw new SQLException("Virhe");
             }
         } catch (SQLException ex) {
+            dbConnection.rollback();
             System.err.println("Ilmeni virhe kun korttia yritettiin poistaa: " + ex.getMessage());
             return false;
         }
@@ -237,8 +240,35 @@ public class Database {
     }
 
     /********* Poista koko pakka *********/
-    public boolean deletePakka() throws SQLException {
-        return false;
+    public boolean deletePakka(String pakkaName) throws SQLException {
+        String decksDeleteSQL = "DELETE FROM pakat WHERE name = ?";
+        String cardsDeleteSQL = "DELETE FROM kortit WHERE pakka_id = ?";
+
+        dbConnection.setAutoCommit(false);
+
+        try (PreparedStatement deleteKortit = dbConnection.prepareStatement(cardsDeleteSQL)) {
+            deleteKortit.setString(1, pakkaName);
+            deleteKortit.executeUpdate();
+        } catch (SQLException ex) {
+            dbConnection.rollback();
+            System.err.println("Ilmeni virhe kun kortteja yritettiin poistaa: " + ex.getMessage());
+            return false;
+        }
+
+        try (PreparedStatement deletePakka = dbConnection.prepareStatement(decksDeleteSQL)) {
+            deletePakka.setString(1, pakkaName);
+            int decks = deletePakka.executeUpdate();
+            if (decks > 0) {
+                dbConnection.commit();
+                return true;
+            } else {
+                throw new SQLException("Pakan poistossa ilmeni virhe");
+            }
+        } catch (SQLException ex) {
+            dbConnection.rollback();
+            System.err.println("Ilmeni virhe kun pakkaa yritettiin poistaa: " + ex.getMessage());
+            return false;
+        }
     }
 
     /********* Luodaan uusi pakka *********/
