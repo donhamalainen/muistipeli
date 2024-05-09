@@ -14,7 +14,7 @@ public class ConstantValue {
     public static final String IN_GAME_SCREEN_STRING = "InGameScreen";
 
     // GAME
-    public static final int DEFAULT_SIZE_OF_DECK = 15;
+    public static final int DEFAULT_SIZE_OF_DECK = 0;
     public static final int DEFAULT_STATS_CORRECT = 0;
     public static final int DEFUALT_STATS_INCORRECT = 0;
     public static final int DEFAULT_PLAY_BUTTON_SIZE = 14;

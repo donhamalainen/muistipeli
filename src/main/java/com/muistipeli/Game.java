@@ -13,23 +13,33 @@ public class Game {
     private int oikea = ConstantValue.DEFAULT_STATS_CORRECT;
     private int vaara = ConstantValue.DEFUALT_STATS_INCORRECT;
     private int jaljella = ConstantValue.DEFAULT_SIZE_OF_DECK;
-    private int pelatutKortit;
+    private HashMap<String, String> pelatutKortit = new HashMap<>();
     private HashMap<String, String> kortit = new HashMap<>();
+    private int totalCardNumber = 0;
+    private String deckName;
+    @SuppressWarnings("unused")
+    private int playSize;
     // DATABASE
     Database database = Database.getInstance();
 
     // Konstruktorit
-    public Game(String deckName) throws SQLException {
-        startGame(deckName);
+    public Game(String deckName, int playSize) throws SQLException {
+        this.deckName = deckName;
+        this.playSize = playSize;
+        startGame();
     }
 
     /******** GAME START ********/
-    public void startGame(String deckName) throws SQLException {
+    public void startGame() throws SQLException {
         kortit = database.getKortit(deckName);
+        this.totalCardNumber = kortit.size();
         setOikea(oikea);
         setVaara(vaara);
         setJaljella(jaljella);
+    }
 
+    public void resetJaljella(int newPlaySize) {
+        this.jaljella = newPlaySize;
     }
 
     /******** GAME END ********/
@@ -43,7 +53,7 @@ public class Game {
     /******** GAME CARD SHUFFLE ********/
     public HashMap<String, String> getRandomCards(int shuffleCount) {
         HashMap<String, String> shuffledList = new HashMap<>();
-        List<String> keys = new ArrayList<>(kortit.keySet()); // Käytä kortit-karttaa suoraan
+        List<String> keys = new ArrayList<>(kortit.keySet());
 
         if (shuffleCount > kortit.size()) {
             shuffleCount = kortit.size();
@@ -53,6 +63,9 @@ public class Game {
             int randomIndex = random.nextInt(keys.size());
             String selectedKey = keys.get(randomIndex);
             shuffledList.put(selectedKey, kortit.get(selectedKey));
+            pelatutKortit.put(selectedKey, kortit.get(selectedKey));
+
+            kortit.remove(selectedKey);
             keys.remove(randomIndex);
         }
 
@@ -61,7 +74,7 @@ public class Game {
 
     /******** GAME CARD ANSWER CHECKER ********/
     public boolean checkAnswer(String answer, String word) {
-        if (answer.equalsIgnoreCase(kortit.get(word))) {
+        if (answer.equalsIgnoreCase(pelatutKortit.get(word))) {
             oikea++;
             jaljella--;
             return true;
@@ -73,8 +86,12 @@ public class Game {
     }
 
     /******** GETTERS & SETTERS ********/
-    public int deckSize() {
+    public int realDeckSize() {
         return kortit.size();
+    }
+
+    public int totalDeckSize() {
+        return this.totalCardNumber;
     }
 
     public int getOikea() {
@@ -86,7 +103,7 @@ public class Game {
     }
 
     public int getJaljella() {
-        return jaljella;
+        return this.jaljella;
     }
 
     public void setOikea(int oikea) {
@@ -98,15 +115,10 @@ public class Game {
     }
 
     public void setJaljella(int jaljella) {
-
-        if (kortit.size() < 15) {
-            this.jaljella = kortit.size();
-        } else {
-            this.jaljella = jaljella;
-        }
+        this.jaljella = jaljella;
     }
 
-    public int getPelatutKortit() {
-        return pelatutKortit;
+    public int getCountPlayedCards() {
+        return pelatutKortit.size();
     }
 }
