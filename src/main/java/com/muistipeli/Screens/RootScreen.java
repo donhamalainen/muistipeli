@@ -18,9 +18,10 @@ public class RootScreen extends JFrame {
     // GridBagConstraints
     GridBagConstraints constraints = new GridBagConstraints();
     // Layout
-    private JPanel rootCards;
+    private JPanel rootCards, buttonPanel;
     private CardLayout rootCardLayout;
-
+    // Painikkeet
+    private JButton playButton, deckButton, helpButton;
     // Näkymät
     PlayScreen PLAYSCREEN;
     DeckScreen DECKSCREEN;
@@ -70,21 +71,10 @@ public class RootScreen extends JFrame {
         mainPanel.add(labelPanel, constraints);
 
         // BUTTON
-        JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 0, 25));
+        buttonPanel = new JPanel(new GridLayout(3, 1, 0, 25));
         buttonPanel.setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
-        JButton playButton = createButton(database.hasPakka() ? "Pelaa" : "Pakkoja ei ole luotu",
-                ConstantValue.PLAYSCREEN_STRING, 50, 250,
-                database.hasPakka() ? Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR) : Color.LIGHT_GRAY,
-                database.hasPakka() ? null : Color.GRAY, ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE, this);
-        playButton.setEnabled(database.hasPakka());
-        buttonPanel.add(playButton);
-        buttonPanel.add(createButton(database.hasPakka() ? "Muokkaa pakkoja" : "Luo pakkoja",
-                ConstantValue.DECKSCREEN_STRING, 50, 250,
-                Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR), null,
-                ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE, this));
-        buttonPanel.add(createButton("Ohjeet", ConstantValue.HELPSCREEN_STRING, 50, 250,
-                Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR), null,
-                ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE, this));
+
+        initializeButtons();
 
         constraints = new GridBagConstraints();
         constraints.gridx = 0;
@@ -95,52 +85,114 @@ public class RootScreen extends JFrame {
 
     }
 
-    /* COMPONENTS */
-    private JButton createButton(final String text, final String screen, int height, int width, final Color bgColor,
-            Color foreColor,
-            int fontSize, final RootScreen rootScreen) throws SQLException {
-        final JButton button = new JButton(text);
-        button.setFont(new Font("Verdana", Font.PLAIN, fontSize));
-        button.addActionListener(new ActionListener() {
+    /* Check the changes */
+    public void initializeButtons() throws SQLException {
+        final boolean hasPakka = database.hasPakka();
+        // PLAY BUTTON
+        playButton = new JButton(hasPakka ? "Pelaa" : "Pakkoja ei ole luotu");
+        playButton.setEnabled(hasPakka);
+        playButton.setCursor(hasPakka ? new Cursor(Cursor.HAND_CURSOR) : new Cursor(Cursor.DEFAULT_CURSOR));
+        playButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE));
+        playButton.setFocusPainted(false);
+        playButton.setBorderPainted(false);
+        playButton.setOpaque(true);
+        playButton.setBackground(
+                hasPakka ? Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR) : Color.LIGHT_GRAY);
+        playButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                initializeScreens(screen);
+                initializeScreens(ConstantValue.PLAYSCREEN_STRING);
             }
 
         });
-        button.setPreferredSize(new Dimension(width, height));
+        playButton.addMouseListener(new MouseAdapter() {
 
-        if (bgColor != null) {
-            button.setBorderPainted(false);
-            button.setOpaque(true);
-            button.setBackground(bgColor);
-        }
-        button.setFocusPainted(false);
-
-        button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                try {
-                    if (text.equals("Pakkoja ei ole luotu") && !database.hasPakka()) {
-                        // button.setBackground(bgColor.darker());
-                    } else {
-                        button.setBackground(bgColor.darker());
-                    }
-                } catch (SQLException sqlMouseE) {
-                    sqlMouseE.printStackTrace();
+                if (hasPakka) {
+                    playButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR).darker());
+                    playButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                } else {
+                    playButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 }
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                button.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-                button.setBackground(bgColor);
+                playButton.setBackground(
+                        hasPakka ? Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR) : Color.LIGHT_GRAY);
+                playButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
+        });
+        playButton.setPreferredSize(new Dimension(250, 50));
+
+        buttonPanel.add(playButton);
+        // DECK BUTTON
+        deckButton = new JButton(database.hasPakka() ? "Muokkaa pakkoja" : "Luo pakkoja");
+        deckButton.setPreferredSize(new Dimension(250, 50));
+        deckButton.setFocusPainted(false);
+        deckButton.setBorderPainted(false);
+        deckButton.setOpaque(true);
+        deckButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+        deckButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE));
+        deckButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                initializeScreens(ConstantValue.DECKSCREEN_STRING);
+            }
+
+        });
+
+        deckButton.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                deckButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR).darker());
+                deckButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                deckButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+                deckButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             }
         });
 
-        return button;
+        buttonPanel.add(deckButton);
+        // HELP BUTTON
+        helpButton = new JButton("Pelin ohjeet");
+        helpButton.setPreferredSize(new Dimension(250, 50));
+        helpButton.setFocusPainted(false);
+        helpButton.setBorderPainted(false);
+        helpButton.setOpaque(true);
+        helpButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+        helpButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.NAVIGATIONS_BUTTONS_FONT_SIZE));
+        helpButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                initializeScreens(ConstantValue.HELPSCREEN_STRING);
+            }
+
+        });
+
+        helpButton.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                helpButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR).darker());
+                helpButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                helpButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+                helpButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
+        });
+        buttonPanel.add(helpButton);
     }
 
     /* initializeScreens */
@@ -154,6 +206,10 @@ public class RootScreen extends JFrame {
             switch (screen) {
                 case ConstantValue.ROOTSCREEN_STRING:
                     rootCardLayout.show(rootCards, screen);
+                    buttonPanel.remove(playButton);
+                    buttonPanel.remove(deckButton);
+                    buttonPanel.remove(helpButton);
+                    initializeButtons();
                 case ConstantValue.PLAYSCREEN_STRING:
                     PLAYSCREEN = new PlayScreen(rootCards, database, this);
                     rootCards.add(PLAYSCREEN, ConstantValue.PLAYSCREEN_STRING);
