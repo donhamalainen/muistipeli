@@ -535,7 +535,9 @@ public class DeckScreen extends JPanel {
                                 "Virhe",
                                 JOptionPane.ERROR_MESSAGE);
                     } else {
-                        database.addKortti(wordField.getText(), translationField.getText(), pakkaNimi);
+                        String newWord = wordField.getText().toLowerCase();
+                        String newTranslate = translationField.getText().toLowerCase();
+                        database.addKortti(newWord, newTranslate, pakkaNimi);
                         refreshCardScrollPane(pakkaNimi);
                         dialog.dispose();
                     }

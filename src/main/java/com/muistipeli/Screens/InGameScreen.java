@@ -364,19 +364,19 @@ public class InGameScreen extends JPanel {
                             if (inputValue > 0 && inputValue <= game.realDeckSize()) {
                                 kortit = game.getRandomCards(inputValue);
                                 game.resetJaljella(inputValue);
+                                leftQuestions.setText("Kortteja jäljellä: " + game.getJaljella());
                                 sanaLista = new ArrayList<>(kortit.keySet());
                                 kaannosLista = new ArrayList<>(kortit.values());
 
                                 if (!sanaLista.isEmpty()) {
                                     wordLabel.setText(sanaLista.get(0));
                                     currentCardIndex = 0;
-                                    leftQuestions = new JLabel("Kortteja jäljellä: " + game.getJaljella(), JLabel.LEFT);
                                 }
                                 break;
                             } else {
                                 JOptionPane.showMessageDialog(
                                         null,
-                                        "Virheellinen määrä. Anna arvo 1 - " + game.totalDeckSize() + " välillä.",
+                                        "Virheellinen määrä. Anna arvo 1 - " + game.realDeckSize() + " välillä.",
                                         "Virhe",
                                         JOptionPane.ERROR_MESSAGE);
                             }
@@ -415,8 +415,9 @@ public class InGameScreen extends JPanel {
                                     try {
                                         int inputValue = Integer.parseInt(input);
                                         if (inputValue > 0 && inputValue <= game.realDeckSize()) {
-
+                                            game.resetJaljella(inputValue);
                                             kortit = game.getRandomCards(inputValue);
+                                            leftQuestions.setText("Kortteja jäljellä: " + game.getJaljella());
                                             sanaLista = new ArrayList<>(kortit.keySet());
                                             kaannosLista = new ArrayList<>(kortit.values());
 
@@ -424,14 +425,12 @@ public class InGameScreen extends JPanel {
                                             if (!sanaLista.isEmpty()) {
                                                 wordLabel.setText(sanaLista.get(0));
                                                 currentCardIndex = 0;
-                                                leftQuestions = new JLabel("Kortteja jäljellä: " + game.getJaljella(),
-                                                        JLabel.LEFT);
                                             }
                                             break;
                                         } else {
                                             JOptionPane.showMessageDialog(
                                                     null,
-                                                    "Virheellinen määrä. Anna arvo 1 - " + game.totalDeckSize()
+                                                    "Virheellinen määrä. Anna arvo 1 - " + game.realDeckSize()
                                                             + " välillä.",
                                                     "Virhe",
                                                     JOptionPane.ERROR_MESSAGE);
@@ -442,11 +441,11 @@ public class InGameScreen extends JPanel {
                                 }
                                 break;
                             } catch (SQLException e) {
-                                // TODO Auto-generated catch block
                                 e.printStackTrace();
                             }
 
                         case JOptionPane.NO_OPTION:
+                            JOptionPane.showMessageDialog(null, "Kiitos pelaamisesta!");
                             game.endGame();
                             rootCardLayout.show(rootCards, ConstantValue.PLAYSCREEN_STRING);
                             break;
@@ -454,20 +453,61 @@ public class InGameScreen extends JPanel {
                 }
                 break;
             case JOptionPane.CANCEL_OPTION:
+                game.endGame();
                 JOptionPane.showMessageDialog(null, "Kiitos pelaamisesta!");
                 rootCardLayout.show(rootCards, ConstantValue.PLAYSCREEN_STRING);
                 break;
             case JOptionPane.NO_OPTION:
-                // game.reset();
-                kortit = game.getRandomCards(playSize);
+                try {
+                    game.endGame();
+                    game.startGame();
 
-                sanaLista = new ArrayList<>(kortit.keySet());
-                kaannosLista = new ArrayList<>(kortit.values());
+                    while (true) {
+                        String input = JOptionPane.showInputDialog(
+                                null,
+                                "Kuinka monta korttia haluat pelata pakasta? (enintään "
+                                        + game.realDeckSize()
+                                        + ")",
+                                "Valitse korttien määrä",
+                                JOptionPane.QUESTION_MESSAGE);
+                        if (input == null) {
+                            game.endGame();
+                            JOptionPane.showMessageDialog(null, "Kiitos pelaamisesta!");
+                            rootCardLayout.show(rootCards, ConstantValue.PLAYSCREEN_STRING);
+                            break;
+                        }
 
-                if (!sanaLista.isEmpty()) {
-                    wordLabel.setText(sanaLista.get(0));
-                    currentCardIndex = 0;
-                    leftQuestions = new JLabel("Kortteja jäljellä: " + game.getJaljella(), JLabel.LEFT);
+                        try {
+                            int inputValue = Integer.parseInt(input);
+                            if (inputValue > 0 && inputValue <= game.realDeckSize()) {
+                                game.resetJaljella(inputValue);
+                                kortit = game.getRandomCards(inputValue);
+                                rightAnswer.setText("Oikein: " + game.getOikea());
+                                wrongAnswer.setText("Väärin: " + game.getVaara());
+                                leftQuestions.setText("Kortteja jäljellä: " + game.getJaljella());
+                                sanaLista = new ArrayList<>(kortit.keySet());
+                                kaannosLista = new ArrayList<>(kortit.values());
+
+                                game.resetJaljella(inputValue);
+                                if (!sanaLista.isEmpty()) {
+                                    wordLabel.setText(sanaLista.get(0));
+                                    currentCardIndex = 0;
+                                }
+                                break;
+                            } else {
+                                JOptionPane.showMessageDialog(
+                                        null,
+                                        "Virheellinen määrä. Anna arvo 1 - " + game.realDeckSize()
+                                                + " välillä.",
+                                        "Virhe",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
                 break;
         }
