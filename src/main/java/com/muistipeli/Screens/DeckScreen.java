@@ -97,7 +97,6 @@ public class DeckScreen extends JPanel {
         backButton.setFocusPainted(false);
 
         backButton.addMouseListener(new MouseAdapter() {
-
             @Override
             public void mouseEntered(MouseEvent e) {
                 backButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR).darker());

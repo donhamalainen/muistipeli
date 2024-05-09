@@ -3,6 +3,8 @@ package com.muistipeli.Screens;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 
 import javax.swing.*;
@@ -45,7 +47,6 @@ public class HelpScreen extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println("Vaihdetaan näkymään: " + screen);
             rootCardLayout.show(rootCards, screen);
         }
     }
@@ -68,6 +69,20 @@ public class HelpScreen extends JPanel {
         backButton.setOpaque(true);
         backButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
         backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        backButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                backButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR).darker());
+                backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                backButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+                backButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
+        });
         backButton.setFocusPainted(false);
 
         constraints = new GridBagConstraints();
@@ -79,18 +94,20 @@ public class HelpScreen extends JPanel {
         add(backButton, constraints);
     }
 
-    private void addInstructions(){ 
+    private void addInstructions() {
 
         instructions = new JTextArea();
         instructions.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
         instructions.setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
         instructions.setText("1. Aloita luomalla pakka Luo pakka valikossa\n" +
-                                     "2. Tupla klikkaa luomaasi pakkaa, valikko aukeaa jossa pystyt lisäämään kortteja haluamallasi käännöksillä\n" +
-                                     "3. Kun olet luonut kortit haluamaasi pakkaan, siirry päävalikkoon ja paina Pelaa nappia\n" +
-                                     "4. Valitse pakka jolla haluat pelata, klikkaa Pelaa nappia ja syötä korttimäärä jonka haluat pelata\n" +
-                                     "5. Peli alkaa, ruudullasi näkyy 1 sana kerrallaan, kirjoita sen käännös. Ruudun vasemmalta puolelta näet oikeat/väärät vastaukset sekä kuinka monta korttia on jäljellä");
-        instructions.setEditable(false); 
-        instructions.setLineWrap(true); 
+                "2. Tupla klikkaa luomaasi pakkaa, valikko aukeaa jossa pystyt lisäämään kortteja haluamallasi käännöksillä\n"
+                +
+                "3. Kun olet luonut kortit haluamaasi pakkaan, siirry päävalikkoon ja paina Pelaa nappia\n" +
+                "4. Valitse pakka jolla haluat pelata, klikkaa Pelaa nappia ja syötä korttimäärä jonka haluat pelata\n"
+                +
+                "5. Peli alkaa, ruudullasi näkyy 1 sana kerrallaan, kirjoita sen käännös. Ruudun vasemmalta puolelta näet oikeat/väärät vastaukset sekä kuinka monta korttia on jäljellä");
+        instructions.setEditable(false);
+        instructions.setLineWrap(true);
         instructions.setWrapStyleWord(true);
 
         constraints.gridx = 0;
