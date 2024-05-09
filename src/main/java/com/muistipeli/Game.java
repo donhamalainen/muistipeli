@@ -15,22 +15,31 @@ public class Game {
     private int jaljella = ConstantValue.DEFAULT_SIZE_OF_DECK;
     private HashMap<String, String> pelatutKortit = new HashMap<>();
     private HashMap<String, String> kortit = new HashMap<>();
+    private int totalCardNumber = 0;
+    private String deckName;
+    @SuppressWarnings("unused")
+    private int playSize;
     // DATABASE
     Database database = Database.getInstance();
 
     // Konstruktorit
     public Game(String deckName, int playSize) throws SQLException {
-        startGame(deckName);
-        setJaljella(playSize);
+        this.deckName = deckName;
+        this.playSize = playSize;
+        startGame();
     }
 
     /******** GAME START ********/
-    public void startGame(String deckName) throws SQLException {
+    public void startGame() throws SQLException {
         kortit = database.getKortit(deckName);
+        this.totalCardNumber = kortit.size();
         setOikea(oikea);
         setVaara(vaara);
         setJaljella(jaljella);
+    }
 
+    public void resetJaljella(int newPlaySize) {
+        this.jaljella = newPlaySize;
     }
 
     /******** GAME END ********/
@@ -45,6 +54,7 @@ public class Game {
     public HashMap<String, String> getRandomCards(int shuffleCount) {
         HashMap<String, String> shuffledList = new HashMap<>();
         List<String> keys = new ArrayList<>(kortit.keySet());
+
         if (shuffleCount > kortit.size()) {
             shuffleCount = kortit.size();
         }
@@ -55,6 +65,7 @@ public class Game {
             shuffledList.put(selectedKey, kortit.get(selectedKey));
             pelatutKortit.put(selectedKey, kortit.get(selectedKey));
 
+            kortit.remove(selectedKey);
             keys.remove(randomIndex);
         }
 
@@ -75,8 +86,12 @@ public class Game {
     }
 
     /******** GETTERS & SETTERS ********/
-    public int totalDeckSize() {
+    public int realDeckSize() {
         return kortit.size();
+    }
+
+    public int totalDeckSize() {
+        return this.totalCardNumber;
     }
 
     public int getOikea() {
@@ -88,7 +103,7 @@ public class Game {
     }
 
     public int getJaljella() {
-        return jaljella;
+        return this.jaljella;
     }
 
     public void setOikea(int oikea) {
@@ -100,12 +115,7 @@ public class Game {
     }
 
     public void setJaljella(int jaljella) {
-
-        if (kortit.size() < 15) {
-            this.jaljella = kortit.size();
-        } else {
-            this.jaljella = jaljella;
-        }
+        this.jaljella = jaljella;
     }
 
     public int getCountPlayedCards() {
