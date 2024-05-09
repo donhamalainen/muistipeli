@@ -33,13 +33,14 @@ public class Game {
     public void startGame() throws SQLException {
         kortit = database.getKortit(deckName);
         this.totalCardNumber = kortit.size();
+        pelatutKortit = new HashMap<>();
         setOikea(oikea);
         setVaara(vaara);
-        setJaljella(jaljella);
+        setJaljella(playSize);
     }
 
     public void resetJaljella(int newPlaySize) {
-        this.jaljella = newPlaySize;
+        setJaljella(newPlaySize);
     }
 
     /******** GAME END ********/
@@ -48,6 +49,7 @@ public class Game {
         this.vaara = ConstantValue.DEFUALT_STATS_INCORRECT;
         this.jaljella = ConstantValue.DEFAULT_SIZE_OF_DECK;
         kortit = new HashMap<>();
+        pelatutKortit = new HashMap<>();
     }
 
     /******** GAME CARD SHUFFLE ********/
