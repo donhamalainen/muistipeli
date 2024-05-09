@@ -96,6 +96,21 @@ public class DeckScreen extends JPanel {
         backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         backButton.setFocusPainted(false);
 
+        backButton.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                backButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR).darker());
+                backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                backButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+                backButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
+        });
+
         constraints = new GridBagConstraints();
         constraints.anchor = GridBagConstraints.NORTHWEST;
         constraints.weightx = 0;
@@ -175,7 +190,7 @@ public class DeckScreen extends JPanel {
             pakkaHeaderPanel.setBackground(Color.white);
 
             // DELETE
-            JButton deleteDeckButton = new JButton("Poista pakka");
+            final JButton deleteDeckButton = new JButton("Poista pakka");
             deleteDeckButton.addActionListener(new ActionListener() {
 
                 @Override
@@ -188,7 +203,6 @@ public class DeckScreen extends JPanel {
                                 JOptionPane.INFORMATION_MESSAGE);
                     }
                 }
-
             });
             deleteDeckButton.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
             deleteDeckButton.setBorderPainted(false);
@@ -197,12 +211,27 @@ public class DeckScreen extends JPanel {
             deleteDeckButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
             deleteDeckButton.setOpaque(true);
             deleteDeckButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
-            deleteDeckButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             deleteDeckButton.setFocusPainted(false);
+
+            deleteDeckButton.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    deleteDeckButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR).darker());
+                    deleteDeckButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    deleteDeckButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+                    deleteDeckButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                }
+            });
+
             pakkaHeaderPanel.add(deleteDeckButton);
 
             // ADD
-            JButton addDeckButton = new JButton("Luo pakka");
+            final JButton addDeckButton = new JButton("Luo pakka");
             addDeckButton.addActionListener(new ActionListener() {
 
                 @Override
@@ -218,8 +247,23 @@ public class DeckScreen extends JPanel {
             addDeckButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
             addDeckButton.setOpaque(true);
             addDeckButton.setBackground(Color.GREEN);
-            addDeckButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             addDeckButton.setFocusPainted(false);
+
+            addDeckButton.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    addDeckButton.setBackground(Color.GREEN.darker());
+                    addDeckButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    addDeckButton.setBackground(Color.GREEN);
+                    addDeckButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                }
+            });
+
             pakkaHeaderPanel.add(addDeckButton);
 
             // MODIFY
@@ -240,8 +284,28 @@ public class DeckScreen extends JPanel {
             modifyDeckButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
             modifyDeckButton.setOpaque(true);
             modifyDeckButton.setBackground(Color.LIGHT_GRAY);
-            modifyDeckButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             modifyDeckButton.setFocusPainted(false);
+
+            modifyDeckButton.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    if (modifyDeckButton.isEnabled()) {
+                        modifyDeckButton.setBackground(Color.ORANGE.darker());
+                        modifyDeckButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                    }
+
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    if (modifyDeckButton.isEnabled()) {
+                        modifyDeckButton.setBackground(Color.ORANGE);
+                        modifyDeckButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                    }
+                }
+            });
+
             pakkaHeaderPanel.add(modifyDeckButton);
 
             /******** ACTION LISTENERS ********/
@@ -322,7 +386,7 @@ public class DeckScreen extends JPanel {
             korttiHeaderPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             korttiHeaderPanel.setBackground(Color.white);
             // Lisää takaisin-painike
-            JButton scrollBackButton = new JButton("Takaisin pakkoihin");
+            final JButton scrollBackButton = new JButton("Takaisin pakkoihin");
             scrollBackButton.addActionListener(new ActionListener() {
 
                 @Override
@@ -339,12 +403,26 @@ public class DeckScreen extends JPanel {
             scrollBackButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
             scrollBackButton.setOpaque(true);
             scrollBackButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
-            scrollBackButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             scrollBackButton.setFocusPainted(false);
+
+            scrollBackButton.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    scrollBackButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR).darker());
+                    scrollBackButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    scrollBackButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+                    scrollBackButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                }
+            });
             korttiHeaderPanel.add(scrollBackButton);
 
             // luo uusikortit
-            JButton createNewCardButton = new JButton("Luo uusi kortti");
+            final JButton createNewCardButton = new JButton("Luo uusi kortti");
 
             createNewCardButton.addActionListener(new ActionListener() {
                 @Override
@@ -361,8 +439,22 @@ public class DeckScreen extends JPanel {
             createNewCardButton.setBorderPainted(false);
             createNewCardButton.setOpaque(true);
             createNewCardButton.setBackground(Color.GREEN);
-            createNewCardButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             createNewCardButton.setFocusPainted(false);
+
+            createNewCardButton.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    createNewCardButton.setBackground(Color.GREEN.darker());
+                    createNewCardButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    createNewCardButton.setBackground(Color.GREEN);
+                    createNewCardButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                }
+            });
             korttiHeaderPanel.add(createNewCardButton);
 
             // luo uusikortit
@@ -375,7 +467,6 @@ public class DeckScreen extends JPanel {
             deleteCardButton.setBorderPainted(false);
             deleteCardButton.setOpaque(true);
             deleteCardButton.setBackground(Color.LIGHT_GRAY);
-            deleteCardButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             deleteCardButton.setFocusPainted(false);
 
             deleteCardButton.addActionListener(new ActionListener() {
@@ -390,6 +481,7 @@ public class DeckScreen extends JPanel {
                             if (database.deleteKortti(selectedWord[0], selectedWord[1])) {
                                 refreshCardScrollPane(pakkaNimi);
                                 deleteCardButton.setBackground(Color.LIGHT_GRAY);
+                                deleteCardButton.setEnabled(false);
                             } else {
                                 throw new SQLException("Tuntematon virhe poistettaessa korttia.");
                             }
@@ -406,6 +498,25 @@ public class DeckScreen extends JPanel {
 
             });
 
+            deleteCardButton.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    if (deleteCardButton.isEnabled()) {
+                        deleteCardButton.setBackground(Color.ORANGE.darker());
+                        deleteCardButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                    }
+                    ;
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    if (deleteCardButton.isEnabled()) {
+                        deleteCardButton.setBackground(Color.ORANGE);
+                        deleteCardButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                    }
+                }
+            });
             korttiHeaderPanel.add(deleteCardButton);
 
             if (kortit.isEmpty()) {
@@ -578,7 +689,7 @@ public class DeckScreen extends JPanel {
     private void modifyDeck(final String deck) {
         final JTextField newName = new JTextField(deck);
         Object[] fields = {
-                "nimi:", newName,
+                "Anna uusi nimi:", newName,
         };
 
         JButton okButton = new JButton("Vahvista");
@@ -597,7 +708,8 @@ public class DeckScreen extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    database.setPakkaName(deck, newName.getText());
+                    String newNameTrimmed = newName.getText().toLowerCase();
+                    database.setPakkaName(deck, newNameTrimmed);
                     refreshDeckScrollPane();
                 } catch (SQLException e1) {
                     e1.printStackTrace();
@@ -680,9 +792,32 @@ public class DeckScreen extends JPanel {
                 refreshDeckScrollPane();
                 modifyDeckButton.setEnabled(false);
                 modifyDeckButton.setBackground(Color.LIGHT_GRAY);
-                JOptionPane.showMessageDialog(null, "Pakka " + pakkaNimi + " poistettu onnistuneesti.",
-                        "Pakan poisto",
-                        JOptionPane.INFORMATION_MESSAGE);
+                final JDialog dialog = new JDialog();
+                dialog.setAlwaysOnTop(true);
+                dialog.setUndecorated(true);
+                dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+                dialog.setType(Window.Type.POPUP);
+
+                JOptionPane optionPane = new JOptionPane(
+                        "Pakka " + pakkaNimi + " poistettu onnistuneesti.",
+                        JOptionPane.INFORMATION_MESSAGE,
+                        JOptionPane.DEFAULT_OPTION,
+                        null, new Object[] {}, null);
+
+                dialog.setContentPane(optionPane);
+
+                dialog.pack();
+                dialog.setLocationRelativeTo(null);
+                dialog.setVisible(true);
+
+                Timer timer = new Timer(1200, new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        dialog.dispose();
+                    }
+                });
+                timer.setRepeats(false);
+                timer.start();
+
                 selectedDeck = null;
             } else {
                 JOptionPane.showMessageDialog(null,
