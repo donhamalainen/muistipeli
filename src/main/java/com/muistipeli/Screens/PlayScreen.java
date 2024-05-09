@@ -205,12 +205,13 @@ public class PlayScreen extends JPanel {
                         }
 
                     } else {
-                        int response = JOptionPane.showConfirmDialog(
+                        String[] responses = { "Kyllä", "Ei" };
+                        int response = JOptionPane.showOptionDialog(
                                 null,
                                 "Tässä pakassa ei ole pelattavia kortteja. Haluatko luoda kortteja pakkaan?",
                                 "Virhe",
                                 JOptionPane.YES_NO_OPTION,
-                                JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.ERROR_MESSAGE, null, responses, responses[0]);
 
                         if (response == JOptionPane.YES_OPTION) {
                             rootScreen.initializeScreens(ConstantValue.DECKSCREEN_STRING);
@@ -248,8 +249,8 @@ public class PlayScreen extends JPanel {
             @Override
             public void mouseExited(MouseEvent e) {
                 if (playPanel.isEnabled()) {
-                    playPanel.setBackground(Color.LIGHT_GRAY);
-                    playPanel.setForeground(Color.GRAY);
+                    playPanel.setBackground(Color.GREEN);
+                    playPanel.setForeground(Color.BLACK);
                     playPanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 }
             }
