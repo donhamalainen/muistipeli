@@ -153,7 +153,7 @@ public class RootScreen extends JFrame {
         try {
             switch (screen) {
                 case ConstantValue.ROOTSCREEN_STRING:
-                    new RootScreen();
+                    rootCardLayout.show(rootCards, screen);
                 case ConstantValue.PLAYSCREEN_STRING:
                     PLAYSCREEN = new PlayScreen(rootCards, database, this);
                     rootCards.add(PLAYSCREEN, ConstantValue.PLAYSCREEN_STRING);
