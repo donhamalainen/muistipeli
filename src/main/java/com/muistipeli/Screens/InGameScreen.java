@@ -397,6 +397,7 @@ public class InGameScreen extends JPanel {
                     switch (answerYESOption) {
                         case JOptionPane.YES_OPTION:
                             try {
+                                game.endGame();
                                 game.startGame();
 
                                 while (true) {
@@ -417,6 +418,8 @@ public class InGameScreen extends JPanel {
                                         if (inputValue > 0 && inputValue <= game.realDeckSize()) {
                                             game.resetJaljella(inputValue);
                                             kortit = game.getRandomCards(inputValue);
+                                            rightAnswer.setText("Oikein: " + game.getOikea());
+                                            wrongAnswer.setText("Väärin: " + game.getVaara());
                                             leftQuestions.setText("Kortteja jäljellä: " + game.getJaljella());
                                             sanaLista = new ArrayList<>(kortit.keySet());
                                             kaannosLista = new ArrayList<>(kortit.values());
