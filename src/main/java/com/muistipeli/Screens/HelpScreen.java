@@ -17,7 +17,7 @@ public class HelpScreen extends JPanel {
     private CardLayout rootCardLayout;
     private JButton backButton;
     private GridBagConstraints constraints;
-    private JLabel ohjeet;
+    private JTextArea instructions;
 
     /******* KONSTRUKTORI *******/
     public HelpScreen(JPanel cards) throws SQLException {
@@ -25,13 +25,12 @@ public class HelpScreen extends JPanel {
 
         rootCardLayout = (CardLayout) rootCards.getLayout();
         this.setLayout(new GridBagLayout());
-        addBackButton();
-        initializePlayScreen();
+        initializeHelpScreen();
         run();
     }
 
     /******* ALUSTUS *******/
-    private void initializePlayScreen() throws SQLException {
+    private void initializeHelpScreen() throws SQLException {
         setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
         setLayout(new GridBagLayout());
     }
@@ -53,7 +52,8 @@ public class HelpScreen extends JPanel {
 
     /******* ALUSTUS *******/
     private void run() {
-
+        addBackButton();
+        addInstructions();
     }
 
     private void addBackButton() {
@@ -73,9 +73,31 @@ public class HelpScreen extends JPanel {
         constraints = new GridBagConstraints();
         constraints.anchor = GridBagConstraints.NORTHWEST;
         constraints.weightx = 0;
-        constraints.weighty = 0;
-        constraints.insets = new Insets(50, 50, 10, 10);
+        constraints.weighty = 1;
+        constraints.insets = new Insets(50, 50, 0, 10);
 
         add(backButton, constraints);
+    }
+
+    private void addInstructions(){ 
+
+        instructions = new JTextArea();
+        instructions.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
+        instructions.setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
+        instructions.setText("1. Aloita luomalla pakka Luo pakka valikossa\n" +
+                                     "2. Tupla klikkaa luomaasi pakkaa, valikko aukeaa jossa pystyt lisäämään kortteja haluamallasi käännöksillä\n" +
+                                     "3. Kun olet luonut kortit haluamaasi pakkaan, siirry päävalikkoon ja paina Pelaa nappia\n" +
+                                     "4. Valitse pakka jolla haluat pelata, klikkaa Pelaa nappia ja syötä korttimäärä jonka haluat pelata\n" +
+                                     "5. Peli alkaa, ruudullasi näkyy 1 sana kerrallaan, kirjoita sen käännös. Ruudun vasemmalta puolelta näet oikeat/väärät vastaukset sekä kuinka monta korttia on jäljellä");
+        instructions.setEditable(false); 
+        instructions.setLineWrap(true); 
+        instructions.setWrapStyleWord(true);
+
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.weightx = 1;
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.insets = new Insets(0, 50, 0, 10);
+        add(instructions, constraints);
     }
 }
