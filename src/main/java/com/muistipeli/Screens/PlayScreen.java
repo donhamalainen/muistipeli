@@ -3,6 +3,8 @@ package com.muistipeli.Screens;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -82,7 +84,21 @@ public class PlayScreen extends JPanel {
         backButton.setBorderPainted(false);
         backButton.setOpaque(true);
         backButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
-        backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        backButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                backButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR).darker());
+                backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                backButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+                backButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
+        });
+
         backButton.setFocusPainted(false);
 
         constraints = new GridBagConstraints();
@@ -122,8 +138,21 @@ public class PlayScreen extends JPanel {
         modifyButton.setBorderPainted(false);
         modifyButton.setOpaque(true);
         modifyButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
-        modifyButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         modifyButton.setFocusPainted(false);
+
+        modifyButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                modifyButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR).darker());
+                modifyButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                modifyButton.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+                modifyButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
+        });
 
         constraints = new GridBagConstraints();
         constraints.anchor = GridBagConstraints.SOUTHWEST;
@@ -176,12 +205,13 @@ public class PlayScreen extends JPanel {
                         }
 
                     } else {
-                        int response = JOptionPane.showConfirmDialog(
+                        String[] responses = { "Kyllä", "Ei" };
+                        int response = JOptionPane.showOptionDialog(
                                 null,
                                 "Tässä pakassa ei ole pelattavia kortteja. Haluatko luoda kortteja pakkaan?",
                                 "Virhe",
                                 JOptionPane.YES_NO_OPTION,
-                                JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.ERROR_MESSAGE, null, responses, responses[0]);
 
                         if (response == JOptionPane.YES_OPTION) {
                             rootScreen.initializeScreens(ConstantValue.DECKSCREEN_STRING);
@@ -203,8 +233,28 @@ public class PlayScreen extends JPanel {
                 new Dimension(ConstantValue.BACK_BUTTONS_SIZE_WIDTH, ConstantValue.BACK_BUTTONS_SIZE_HEIGHT));
         playPanel.setBorderPainted(false);
         playPanel.setOpaque(true);
-        playPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
         playPanel.setFocusPainted(false);
+
+        playPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (playPanel.isEnabled()) {
+                    playPanel.setBackground(Color.GREEN.darker());
+                    playPanel.setForeground(Color.BLACK);
+                    playPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                }
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (playPanel.isEnabled()) {
+                    playPanel.setBackground(Color.GREEN);
+                    playPanel.setForeground(Color.BLACK);
+                    playPanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                }
+            }
+        });
 
         constraints = new GridBagConstraints();
         constraints.anchor = GridBagConstraints.SOUTHEAST;
@@ -273,7 +323,7 @@ public class PlayScreen extends JPanel {
                     if (pakkaNimi != null) {
                         valittuPakka = pakkaNimi.substring(pakkaNimi.indexOf('.') + 2);
                         playPanel.setEnabled(true);
-                        playPanel.setBackground(Color.decode(ConstantValue.BUTTONS_BACKGROUND_COLOR));
+                        playPanel.setBackground(Color.GREEN);
                         playPanel.setForeground(Color.BLACK);
                     }
                 }
