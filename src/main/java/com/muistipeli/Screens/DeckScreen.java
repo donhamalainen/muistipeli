@@ -44,7 +44,7 @@ public class DeckScreen extends JPanel {
     private JList<String> korttiLista;
     // Painikkeet
     JPanel pakkaHeaderPanel, korttiHeaderPanel;
-    JLabel infoLabel;
+    JLabel infoLabel, selectDeckLabel;
     JButton backButton, renameButton, modifyDeckButton, deleteCardButton;
 
     /******* KONSTRUKTORI *******/
@@ -119,7 +119,7 @@ public class DeckScreen extends JPanel {
         add(backButton, constraints);
 
         // OTSIKKO
-        JLabel selectDeckLabel = new JLabel("Valitse muokattava pakka");
+        selectDeckLabel = new JLabel("Valitse muokattava pakka");
         selectDeckLabel.setFont(new Font("Aries", Font.BOLD, 20));
 
         constraints = new GridBagConstraints();
@@ -376,6 +376,8 @@ public class DeckScreen extends JPanel {
             korttiLista.setModel(korttiModel);
             korttiLista.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             korttiLista.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            korttiLista.setBackground(Color.decode("#CCFFF1"));
+            selectDeckLabel.setText("Kortin muokkaus");
             korttiLista.setFont(new Font("Verdana", Font.ITALIC, 16));
             korttiLista.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             scrollPane.setViewportView(korttiLista);
@@ -392,6 +394,7 @@ public class DeckScreen extends JPanel {
                 public void actionPerformed(ActionEvent e) {
                     scrollPane.setViewportView(pakkaLista);
                     scrollPane.setColumnHeaderView(pakkaHeaderPanel);
+                    selectDeckLabel.setText("Valitse muokattava pakka");
                 }
 
             });
