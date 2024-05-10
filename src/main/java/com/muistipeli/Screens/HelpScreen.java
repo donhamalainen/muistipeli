@@ -96,6 +96,14 @@ public class HelpScreen extends JPanel {
 
     private void addInstructions() {
 
+        JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        panel.setLayout(new GridBagLayout());
+        constraints = new GridBagConstraints();
+        constraints.anchor = GridBagConstraints.WEST;
+
+        add(panel, constraints);
+
         instructions = new JTextArea();
         instructions.setFont(new Font("Verdana", Font.PLAIN, ConstantValue.BACK_BUTTONS_SIZE_FONT));
         instructions.setBackground(Color.decode(ConstantValue.BACKGROUND_COLOR));
