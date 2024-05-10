@@ -111,7 +111,7 @@ public class HelpScreen extends JPanel {
                 "2. Tupla klikkaa luomaasi pakkaa, valikko aukeaa jossa pystyt lisäämään kortteja haluamallasi käännöksillä\n"
                 +
                 "3. Kun olet luonut kortit haluamaasi pakkaan, siirry päävalikkoon ja paina Pelaa nappia\n" +
-                "4. Valitse pakka jolla haluat pelata, klikkaa Pelaa nappia ja syötä korttimäärä jonka haluat pelata\n"
+                "4. Valitse pakka jolla haluat pelata, klikkaa Aloita peli nappia ja syötä korttimäärä jonka haluat pelata\n"
                 +
                 "5. Peli alkaa, ruudullasi näkyy 1 sana kerrallaan, kirjoita sen käännös. Ruudun vasemmalta puolelta näet oikeat/väärät vastaukset sekä kuinka monta korttia on jäljellä");
         instructions.setEditable(false);
