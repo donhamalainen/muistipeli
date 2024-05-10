@@ -376,7 +376,7 @@ public class DeckScreen extends JPanel {
             korttiLista.setModel(korttiModel);
             korttiLista.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             korttiLista.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            korttiLista.setBackground(Color.decode("#CCFFF1"));
+            korttiLista.setBackground(Color.decode("#ebf9fc"));
             selectDeckLabel.setText("Kortin muokkaus");
             korttiLista.setFont(new Font("Verdana", Font.ITALIC, 16));
             korttiLista.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
