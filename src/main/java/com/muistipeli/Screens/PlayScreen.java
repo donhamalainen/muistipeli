@@ -38,6 +38,9 @@ public class PlayScreen extends JPanel {
     // Painikkeet
     JButton playPanel, backButton, modifyButton;
 
+    // Peli
+    Game game;
+
     /******* KONSTRUKTORI *******/
     public PlayScreen(JPanel cards, Database db, RootScreen rootScreen) throws SQLException {
         this.rootCards = cards;
